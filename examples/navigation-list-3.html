@@ -8,28 +8,33 @@
 	<link rel="apple-touch-icon" href="app-icon.png"/>
 	<link rel="shortcut icon" href="favicon.ico">
 	<title>Title</title>
-	<link rel="stylesheet" href="chui/chui.css">
+	<link rel="stylesheet" href="../chui/chui.css">
 	<style>
 		/* Local Styles Here */
 		
 	</style>
-    <script src="chui/jquery-1.6.4.js"></script>
-    <script src="chui/iscroll.js"></script>
-    <script src="chui/chui.js"></script>
+    <script src="../chui/jquery-1.6.4.js"></script>
+    <script src="../chui/iscroll.js"></script>
+    <script src="../chui/chui.js"></script>
 	<script>
 		/* Local JavaScript Here */
+		$(function() {
+		 	
+		});
 		
 	</script>
 </head>
 <body>
-	<app>
-		<view id="main" ui-background-style="striped" ui-navigation-status="current">
-			<navbar>
-				<h1>Main</h1>
-			</navbar>
+	<app ui-kind="navigation-with-one-navbar">
+		<navbar>
+			<uibutton ui-implements="back" ui-bar-align="left"><label>Back</label></uibutton>
+			<h1>Single Navbar</h1>
+		</navbar>
+		<view id="main" ui-background-style="striped" ui-navigation-status="current" ui-subview-navigation="false">
 			<subview id="subview_01" ui-associations="withNavBar">
 				<scrollpanel>
 					<tableview>
+						<tableheader>This is an example of a layout with a single navbar and navigation to different views using drilldown list. The Back button is there but hidden when on the main view, thereafter it appears until the user returns to the main view.</tableheader>
 						<tablecell href="#item_01_view" ui-implements="disclosure">
 							<celltitle>Item</celltitle>
 						</tablecell>
@@ -38,12 +43,6 @@
 			</subview>
 		</view>
 		<view id="item_01_view" ui-navigation-status="upcoming" ui-background-style="slanted-right">
-			<navbar>
-				<uibutton ui-implements="back" ui-bar-align="left">
-					<label>Back</label>
-				</uibutton>
-				<h1>Second View</h1>
-			</navbar>
 			<subview id="subview_01" ui-associations="withNavBar">
 				<scrollpanel>
 					<tableview ui-tablecell-order="stacked">
@@ -57,12 +56,6 @@
 			</subview>
 		</view>
 		<view id="item_01_detail_view" ui-navigation-status="upcoming" ui-background-style="squared">
-			<navbar>
-				<uibutton ui-implements="back" ui-bar-align="left">
-					<label>Back</label>
-				</uibutton>
-				<h1>Third View</h1>
-			</navbar>
 			<subview id="subview_01" ui-associations="withNavBar">
 				<scrollpanel>
 					<tableview ui-tablecell-order="stacked">
