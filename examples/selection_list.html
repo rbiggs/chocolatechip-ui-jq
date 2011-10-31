@@ -19,9 +19,9 @@
 	<script type="text/javascript">
 		
 		$(function() {
-			$("#activityChoices").UISelectionList(/*function(item){
-				//$("#selectionResponse.response").fill(item.value);
-			}*/);
+			$("#activityChoices").UISelectionList(function(item){
+				$("#selectionResponse.response").text(item.val());
+			});
 			
 		});
 	</script>

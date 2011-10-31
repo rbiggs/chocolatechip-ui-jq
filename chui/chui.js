@@ -11,6 +11,22 @@ $(function() {
 	});
 });
 $.extend({
+	UIUuidSeed : function ( seed ) {
+		if (seed) {
+			return (((1 + Math.random()) * 0x10000) | 0).toString(seed).substring(1);
+		} else {
+			return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+		}
+	},
+	AlphaSeed : function ( ) {
+		var text = "";
+		var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+		text += chars.charAt(Math.floor(Math.random() * chars.length));
+		return text;
+	},
+	UIUuid : function() {
+		return ($.AlphaSeed() + $.UIUuidSeed(20) + $.UIUuidSeed() + "-" + $.UIUuidSeed() + "-" + $.UIUuidSeed() + "-" + $.UIUuidSeed() + "-" + $.UIUuidSeed() + $.UIUuidSeed() + $.UIUuidSeed());
+	},	
 	UINavigationHistory : ["#main"],
 	UINavigateBack : function() {
 		$($.UINavigationHistory[$.UINavigationHistory.length-1]).attr( "ui-navigation-status", "upcoming");
@@ -70,28 +86,16 @@ $(function() {
     });    
 });
 
-/*$.fn.UIToggleButtonLabel = function ( label1, label2 ) {
-	return this.each(function(){
-    	var $this = $(this);
-		if ($this.find("label").text() === label1) {
-			$this.find("label").text(label2);
+$.UIEnableScrolling = function ( options ) {
+	$("scrollpanel").each(function() {
+		if ($(this).data("ui-scroller")) {
+			var whichScroller = $(this).data("ui-scroller");
+			whichScroller.refresh();
 		} else {
-			$this.find("label").text(label1);
+			var scroller = new iScroll($(this)[0].parentNode, options);
+			$(this).data("ui-scroller", scroller);
 		}
 	});
-};*/
-$.UIEnableScrolling = function ( options ) {
-	//try {
-		$("scrollpanel").each(function() {
-			if ($(this).data("ui-scroller")) {
-				var whichScroller = $(this).data("ui-scroller");
-				whichScroller.refresh();
-			} else {
-				var scroller = new iScroll($(this)[0].parentNode, options);
-				$(this).data("ui-scroller", scroller);
-			}
-		});
-	//} catch(e) { }
 };
 $(function() {
 	$.UIEnableScrolling();
@@ -103,8 +107,14 @@ $.fn.UIToggleButtonLabel = function ( label1, label2 ) {
 	} else {
 		$(this).find("label").text(label1);
 	}
+	return this;
 };
-
+$.fn.UIIdentifyChildNodes = function ( ) {
+	var kids = $(this)[0].childElementCount;
+	for (var i = 0; i < kids; i++) {
+		$(this)[0].children[i].setAttribute("ui-child-position", i);
+	}
+};
 $.UIPaging = function( selector, opts ) {
 	var myPager = new iScroll( selector, opts );
 	selector = $(selector);
@@ -123,6 +133,7 @@ $.UIPaging = function( selector, opts ) {
 	indicators += "</stack>";
 	// The maximum number of indicators in portrait view is 17.
 	selector.parent().parent().append(indicators);
+	return this;
 };
 
 $(function() {
@@ -188,6 +199,7 @@ $.fn.UISegmentedPagingControl = function ( ) {
 			}
 		}
 	});
+	return this;
 };
 $(function() {
 	$("body").UISegmentedPagingControl();
@@ -224,9 +236,8 @@ $.extend({
 		       
 		   	   var labels = $(this).attr("ui-button-labels");
 		   	   var buttonLabel = $(this).find("label");
-		   	   console.log(buttonLabel.text());
 			   if (buttonLabel.text() === label1) {
-				   buttonLabel.text(label2);
+				   $(this).UIToggleButtonLabel(label1, label2);
 				   $(this).attr("ui-implements", "done");
 				   listEl.addClass("ui-show-delete-disclosures");
 				   $(this).siblings("uibutton[ui-implements='delete']").css("display","-webkit-inline-box");
@@ -234,7 +245,7 @@ $.extend({
 						$(this).css("-webkit-transform: translate3d(40px, 0, 0)");
 				   });
 			   } else {
-				   buttonLabel.text(label1);
+				   $(this).UIToggleButtonLabel(label1, label2);
 				   $(this).removeAttr("ui-implements");
 				   $(this).siblings("uibutton[ui-implements='delete']").css("display","none");
 				   listEl.removeClass("ui-show-delete-disclosures");
@@ -432,7 +443,7 @@ $.extend({
 				</toolbar>\
 			</panel>\
 		</popup>';
-		$("app").append(popup);
+		$.app.append(popup);
 		var popupID = "#" + id;
 		$(popupID).UIBlock("0.5");
 		var popupBtn = "#" + id + " uibutton";
@@ -473,7 +484,7 @@ $.extend($, {
 		popup.css(pos); 
 	},
 	UIRepositionPopupOnOrientationChange : function ( ) {
-		$("body").bind("orientationchange", function() {
+		$.body.bind("orientationchange", function() {
 			if (window.orientation === 90 || window.orientation === -90) {
 				if ($.UIPopUpIsActive) {
 					$.UIPositionPopUp($.UIPopUpIdentifier);
@@ -503,18 +514,19 @@ $.extend($, {
 $.fn.UIBlock = function ( opacity ) {
 	opacity = opacity ? " style='opacity:" + opacity + "'" : "";
 	$(this).before("<mask" + opacity + "></mask>");
+	return this;
 };
 $.fn.UIUnblock = function ( ) {
 	if ($("mask")) {
 		$("mask").remove();
 	}
+	return this;
 };
 $(function() {
 	$.UIRepositionPopupOnOrientationChange();
 });
 $.fn.UISelectionList = function ( callback ) {
 	$(this).children().each( function(idx) {
-		console.log(this.nodeName);
 		if (this.nodeName.toLowerCase() === "tablecell") {
 			this.insertAdjacentHTML("afterBegin", "<checkmark>&#x2713</checkmark>");
 			$(this).bind("click", function() {
@@ -527,5 +539,239 @@ $.fn.UISelectionList = function ( callback ) {
 			});
 		}
 	});
+	return this;
+};
+$.fn.UISwitchControl = function (callback) {
+	callback = callback || function() { return false; };
+	if ($(this)[0].nodeName.toLowerCase()==="switchcontrol") {
+		callback.call(callback, this);
+		if ($(this).hasClass("on")) {
+			$(this).removeClass("on").addClass("off");
+			$(this).find("input").prop("checked","true");
+		} else {
+			$(this).removeClass("off").addClass("on");
+			$(this).find("input").prop("checked", "false");
+		}
+		$(this).find("thumb").focus();
+	} else {
+		return false;
+	}
+	return this;
+};
+$.fn.UIInitSwitchToggling = function() {
+	$("switchcontrol", $(this)).each(function(idx) {
+		if ($(this).hasClass("on")) {
+			$(this).prop("checked","true");
+			$(this).find("input[type='checkbox']").prop("checked","true");
+		} else {
+			$(this).prop("checked","false");
+			$(this).find("input[type='checkbox']").prop("checked","false");
+		}
+		$(this).bind("click", function(e) {
+			$(this).parent().css("backgroundImage","none");
+			e.preventDefault();
+			$(this).UISwitchControl();
+		});
+	});
+	return this;
+};
+$(function() {
+	$.app.UIInitSwitchToggling();
+});
+$.fn.UICreateSwitchControl = function( opts ) {
+	/* opts:
+	{
+		id : "anID",
+		namePrefix : "customer",
+		customClass : "specials",
+		status : "on",
+		kind : "traditional",
+		labelValue : ["on","off"],
+		value : "$1000",
+		callback : function() {console.log('This is great!');},	
+	}
+	*/
+	var id = opts.id;
+	var namePrefix = "";
+	if (opts.namePrefix) {
+		namePrefix = "name='" + opts.namePrefix + "." + opts.id + "'";
+	} else {
+		namePrefix = "name='" + id + "'";
+	}
+	var customClass = " ";
+	customClass += opts.customClass ? opts.customClass : "";
+	var status = opts.status || "off";
+	var kind = opts.kind ? " ui-kind='" + opts.kind + "'" : "";
+	var label1 = "ON";
+	var label2 = "OFF";
+	if (opts.kind === "traditional") {
+		if (!!opts.labelValue) {
+			label1 = opts.labelValue[0];
+			label2 = opts.labelValue[1];
+		}
+	}
+	var value = opts.value || "";
+	var callback = opts.callback || function() { return false; };
+	var label = (opts.kind === "traditional") ? '<label ui-implements="on">'+ label1 + '</label><thumb></thumb><label ui-implements="off">' + label2 + '</label>' : "<thumb></thumb>";
+	var uiswitch = '<switchcontrol ' + kind + ' class="' + status + " " + customClass + '" id="' + id + '"' + '>' + label + '<input type="checkbox" ' + namePrefix + ' style="display: none;" value="' + value + '"></switchcontrol>';
+	if ($(this).css("position")  !== "absolute") {
+		this.css("position: relative;");
+	}
+	$(this).append(uiswitch);
+	var newSwitchID = "#" + id;
+	$(newSwitchID).find("input").prop("checked", (status === "on" ? true : false));
+	$(newSwitchID).bind("click", function() {
+		$(this).UISwitchControl(callback);
+	});
+};
+$.fn.UISegmentedControl = function( container, callback ) {
+	var that = $(this);
+	var val = 0;
+	callback = callback || function(){};
+	var buttons = $(this).children();
+	var cont = $(container);
+	if (!$(this).attr('ui-selected-segment')) {
+		$(this).attr("ui-selected-segment", "");
+	}
+	if ($(this).attr("ui-selected-index")) {
+		val = $(this).attr("ui-selected-index");
+		var seg = this.children().eq(val);
+		try {
+			seg = seg.attr("id");
+			$(this).attr("ui-selected-segment", seg);
+			$(this).childred().eq(val).addClass("selected");
+		} catch(e) {}
+	} else {
+		var checkChildNodesForAttr = -1;
+		for (var i = 0, len = $(this).children().length; i < len; i++) {
+			if ($(this).children().eq(i).hasClass("selected")) {
+				$(this).attr("ui-selected-index", i);
+			} else {
+				checkChildNodesForAttr++;
+			}
+		}
+		if (checkChildNodesForAttr === $(this).children().length-1) {
+			$(this).attr("ui-selected-index", 0);
+			$(this).children().eq(0).addClass("selected");
+		}
+	}
+	if (container) {
+		container = $(container);
+		if (val) { 
+			container.attr("ui-selected-index", val);
+		} else {
+			container.attr("ui-selected-index", 0);
+		}
+		container.children().css("display: none;");
+		container.children().eq(val).css("display","block");
+		that.attr("ui-segmented-container", ("#" + container.attr("id")));
+		var selectedIndex = this.attr("ui-selected-index");
+		container.closest("scrollpanel").data("ui-scroller").refresh();
+	}
+
+	buttons.each(function() {
+		var that = $(this).closest("segmentedcontrol");
+		if (!$(this).attr("id")) {
+			$(this).attr("id", $.UIUuid());
+		}
+		if (!that.attr("ui-selected-segment")) {
+			if ($(this).hasClass("selected")) {
+				that.attr("ui-selected-segment", $(this).attr("id"));
+			}
+		}
+		$(this).bind("click", function() {
+			var selectedSegment = that.attr("ui-selected-segment");
+			var selectedIndex = that.attr("ui-selected-index");
+			var uicp = $(this).attr("ui-child-position");
+			var container = null;
+			var segmentedcontrol = $(this).closest("segmentedcontrol");
+			if (segmentedcontrol.attr("ui-segmented-container")) {
+				container = $(segmentedcontrol.attr("ui-segmented-container"));
+			}
+			var uisi = null;
+			if (selectedSegment) {
+				uisi = $(this).attr("ui-child-position");
+				that.attr("ui-selected-index", uisi);
+				var oldSelectedSegment = $(("#" + selectedSegment));
+				oldSelectedSegment.removeClass("selected");
+				that.attr("ui-selected-segment", $(this).attr("id"));
+				$(this).addClass("selected");
+				childPosition = $(this).attr("ui-child-position");
+				container.attr("ui-selected-index", uicp);
+				container.children().eq(selectedIndex).css("display", "none");						
+				container.children().eq(uicp).css("display","-webkit-box");
+				container.closest("scrollpanel").data("ui-scroller").refresh();
+			}
+			$(this).addClass("selected");
+				callback.call(callback, $(this));
+		});
+	});
+	$(this).UIIdentifyChildNodes();
+};
+
+$(function() {	 
+	$("segmentedcontrol").each(function(idx) {
+		if ($(this).attr("ui-implements") !== "segmented-paging") {
+			$(this).UISegmentedControl();
+			$(this).closest("scrollpanel").data("ui-scroller").refresh();
+		}
+	});
+});
+$.fn.UICreateSegmentedControl = function(opts) {
+	var segmentedControl = "<segmentedcontrol";
+	if (opts.id) {
+		segmentedControl += " id='" + opts.id + "'";
+	}
+	if (opts.placement) {
+		segmentedControl += " ui-bar-align='" + opts.placement + "'";
+	}
+	if (opts.selectedSegment) {
+		segmentedControl += " ui-selected-index='" + opts.selectedSegment + "'";
+	} else {
+		segmentedControl += " ui-selected-index=''";
+	}
+	if (opts.container) {
+		segmentedControl += " ui-segmented-container='#" + opts.container + "'";
+	}
+	var segClass = opts.cssClass || "";
+	segmentedControl += "'>";
+	if (opts.numberOfSegments) {
+		segments = opts.numberOfSegments;
+		var count = 1;
+		for (var i = 0; i < segments; i++) {
+			segmentedControl += "<uibutton";
+			segmentedControl += " id='" + $.UIUuid() + "'";
+			segmentedControl += " class='" + segClass[count-1];
+			if (opts.selectedSegment) {
+				if (opts.selectedSegment === i) {
+					segmentedControl += " selected'";
+				}
+			}
+			if (opts.disabledSegment) {
+				if (opts.disabledSegment === i) {
+					segmentedControl += " disabled'";
+				}
+			}
+			segmentedControl += "'";
+	
+			segmentedControl += " ui-kind='segmented'";
+			if (opts.placementOfIcons) {
+				segmentedControl += " ui-icon-alignment='" + opts.placementOfIcons[count-1] + "'";
+			}
+			segmentedControl += ">";
+			if (opts.iconsOfSegments) {
+				if (!!opts.iconsOfSegments[i]) {
+				segmentedControl += "<icon ui-implements='icon-mask' style='-webkit-mask-box-image: url(icons/" + opts.iconsOfSegments[count-1] +"." + opts.fileExtension[count-1] + ")'  ui-implements='icon-mask'></icon>";
+				}
+			}
+			if (opts.titlesOfSegments) {
+				segmentedControl += "<label>" + opts.titlesOfSegments[count-1] + "</label>";
+			}
+			segmentedControl += "</uibutton>";
+			count++;
+		}
+		segmentedControl += "</segmentedcontrol>";
+	}	
+	$(this).append(segmentedControl);
 };
 })(jQuery);
