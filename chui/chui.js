@@ -774,4 +774,84 @@ $.fn.UICreateSegmentedControl = function(opts) {
 	}	
 	$(this).append(segmentedControl);
 };
+$.fn.UICreateTabBar = function ( opts ) {
+	var id = opts.id || $.UIUuid();
+	var imagePath = opts.imagePath || "icons\/";
+	var numberOfTabs = opts.numberOfTabs || 1;
+	var tabLabels = opts.tabLabels;
+	var iconsOfTabs = opts.iconsOfTabs;
+	var selectedTab = opts.selectedTab || 0;
+	var disabledTab = opts.disabledTab || null;
+	var tabbar = "<tabbar ui-selected-tab='" + selectedTab + "'>";
+	$(this).attr("ui-tabbar-id", id);
+	for (var i = 0; i < numberOfTabs; i++) {
+		tabbar += "<uibutton ui-implements='tab' ";
+		if (i === selectedTab || i === disabledTab) {
+			tabbar += "class='";
+			if (i === selectedTab) {
+				tabbar += "selected";
+			}
+			if (i === disabledTab) {
+				tabbar += "disabled";
+			}
+			tabbar += "'";
+		}
+		tabbar += "><icon style='-webkit-mask-box-image: url(" + imagePath;
+		tabbar += iconsOfTabs[i] + ".svg);'></icon>";
+		tabbar += "<label>" + tabLabels[i] + "</label></uibutton>";
+	}
+	tabbar += "</tabbar>";
+	$(this).append(tabbar);
+	var subviews = $("subview", $(this));
+	subviews.eq(selectedTab).addClass("selected");
+	this.UITabBar();
+};
+$.fn.UITabBar = function ( ) {
+	var tabs = $("tabbar > uibutton[ui-implements=tab]", $(this));
+	$("tabbar", $(this)).UIIdentifyChildNodes();
+	var tabbar = $("tabbar", $(this));
+	var subviews = $("subview", $(this));
+	subviews.addClass("unselected");
+	var selectedTab = tabbar.attr("ui-selected-tab") || 0;
+	subviews.eq(selectedTab).toggleClass("unselected","selected");
+	tabs.eq(selectedTab).addClass("selected");
+	tabs.each(function(idx) {
+		$(this).bind("click", function() {
+			if ($(this).hasClass("disabled") || $(this).hasClass("selected")) {
+				return;
+			}
+			var whichTab = $(this).closest("tabbar").attr("ui-selected-tab");
+			tabs.eq(whichTab).removeClass("selected");
+			$(this).addClass("selected");
+			subviews.eq(whichTab).removeClass("selected");
+			subviews.eq(whichTab).addClass("unselected");
+			subviews.eq($(this).attr("ui-child-position")).addClass("selected");
+			subviews.eq($(this).attr("ui-child-position")).removeClass("unselected");
+			tabbar.attr("ui-selected-tab", $(this).attr("ui-child-position"));
+		});
+	});
+};
+$.fn.UITabBarForViews = function ( ) {
+	var tabs = $("tabbar > uibutton[ui-implements=tab]", $(this));
+	$("tabbar", $(this)).UIIdentifyChildNodes();
+	var tabbar = $("tabbar", $(this));
+	var views = $("view[ui-implements=tabbar-panel]", $(this));
+	views.attr("ui-navigation-status","upcoming");
+	var selectedTab = tabbar.attr("ui-selected-tab") || 0;
+	views.eq(selectedTab).attr("ui-navigation-status","current");
+	tabs.eq(selectedTab).addClass("selected");
+	tabs.each(function(idx) {
+		$(this).bind("click", function() {
+			if ($(this).hasClass("disabled") || $(this).hasClass("selected")) {
+				return;
+			}
+			var whichTab = $(this).closest("tabbar").attr("ui-selected-tab");
+			tabs.eq(whichTab).removeClass("selected");
+			$(this).addClass("selected");
+			views.eq(whichTab).attr("ui-navigation-status", "upcoming");
+			views.eq($(this).attr("ui-child-position")).attr("ui-navigation-status", "current");
+			tabbar.attr("ui-selected-tab", $(this).attr("ui-child-position"));
+		});
+	});
+}
 })(jQuery);
