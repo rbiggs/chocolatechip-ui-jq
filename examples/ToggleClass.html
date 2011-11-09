@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Untitled</title>
+	<style>
+		body {
+			padding: 40px;
+		}
+		div {
+			display: inline-block;
+			padding: 6px 20px;
+			border-radius: 20px;
+			border: solid 1px #666;
+			-webkit-box-shadow: 0 0 3px #000;
+		}
+		div:hover {
+			background-color: #aaa;
+			color: #fff;
+			cursor: pointer;
+		}
+		.button.beezle {
+			color: red;
+		}
+		.button.bozo {
+			color: blue;
+		}
+	</style>
+	<script src="../chui/jquery-1.6.4.js"></script>
+	<script>
+		$(function() {
+			$.fn.toggleClassName = function( firstClassName, secondClassName ) {
+				if (!$(this).hasClass(firstClassName)) {
+				   $(this).addClass(firstClassName);
+				   $(this).removeClass(secondClassName);
+				} else {
+					$(this).removeClass(firstClassName);
+					$(this).addClass(secondClassName);
+				}
+			};
+			$(".button").bind("click", function() {
+				//$(this).toggleClassName("beezle","bozo");
+				$(this).toggleClass("beezle").toggleClass("bozo");
+			});
+		});
+	</script>
+</head>
+<body>
+	<div class="button">Click</div>
+</body>
+</html>

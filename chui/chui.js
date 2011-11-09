@@ -11,6 +11,19 @@ $(function() {
 	});
 });
 $.extend({
+		iphone : /iphone/img.test(navigator.userAgent),
+		ipad : /ipad/img.test(navigator.userAgent),
+		ipod : /ipod/img.test(navigator.userAgent),
+		ios : /ip(hone|od|ad)/img.test(navigator.userAgent),
+		android : /android/img.test(navigator.userAgent),
+		webos : /webos/img.test(navigator.userAgent),
+		blackberry : /blackberry/img.test(navigator.userAgent),
+		touchEnabled : ("createTouch" in document),
+		online :  navigator.onLine,
+		standalone : navigator.standalone,
+		capitalize : function ( str ) {
+			return str.charAt(0).toUpperCase() + str.substring(1).toLowerCase();
+		},
 	UIUuidSeed : function ( seed ) {
 		if (seed) {
 			return (((1 + Math.random()) * 0x10000) | 0).toString(seed).substring(1);
@@ -89,10 +102,9 @@ $(function() {
 $.UIEnableScrolling = function ( options ) {
 	$("scrollpanel").each(function() {
 		if ($(this).data("ui-scroller")) {
-			var whichScroller = $(this).data("ui-scroller");
-			whichScroller.refresh();
+			$(this).data("ui-scroller").refresh();
 		} else {
-			var scroller = new iScroll($(this)[0].parentNode, options);
+			var scroller = new iScroll(this, options);
 			$(this).data("ui-scroller", scroller);
 		}
 	});
@@ -854,4 +866,649 @@ $.fn.UITabBarForViews = function ( ) {
 		});
 	});
 }
+
+$.fn.UIActionSheet = function(opts) {
+	var that = $(this);
+	var actionSheetID = opts.id;
+	var actionSheetColor =  opts.color;
+	var title = "";
+	if (opts.title) {
+		title = "<p>" + opts.title + "</p>";
+	}
+	var createActionSheet = function() {
+		var actionSheetStr = "<actionsheet id='" + actionSheetID + "' class='hidden' ui-contains='action-buttons'";
+		if (actionSheetColor) {
+			actionSheetStr += " ui-action-sheet-color='" + actionSheetColor + "'";
+		}
+		actionSheetStr += "><scrollpanel>";
+		actionSheetStr += title;
+		var uiButtons = "", uiButtonObj, uiButtonImplements, uiButtonTitle, uiButtonCallback;
+		if (!!opts.uiButtons) {
+			for (var i = 0, len = opts.uiButtons.length; i < len; i++) {
+				uiButtonObj = opts.uiButtons[i];
+				uiButtons += "<uibutton ui-kind='action' ";
+				uiButtonTitle = uiButtonObj.title;
+				uiButtonImplements = uiButtonObj.uiButtonImplements || "";
+				uiButtonCallback = uiButtonObj.callback;
+				actionSheetID.trim();
+				uiButtons += ' ui-implements="' + uiButtonImplements + '" class="stretch" onclick="' + uiButtonCallback + '(\'#' + actionSheetID + '\')"><label>';
+				uiButtons += uiButtonTitle;
+				uiButtons +=	"</label></uibutton>"	;			
+			}
+		}
+		actionSheetStr += uiButtons + "<uibutton ui-kind='action' ui-implements='cancel' class='stretch' onclick='$.UIHideActionSheet(\"#" + actionSheetID + "\")'><label>Cancel</label></uibutton></scrollpanel></actionsheet>";
+		var actionSheet = $(actionSheetStr);
+		that.append(actionSheet);
+	};
+	createActionSheet();
+	var actionSheetUIButtons = "#" + actionSheetID + " uibutton";
+	$(actionSheetUIButtons).bind("click", function() {
+		$.UIHideActionSheet();
+	});
+	
+	var scroller = new iScroll($("#" + actionSheetID)[0]);
+	$("#" + actionSheetID).data("ui-scroller", scroller);
+};
+$.extend($, {
+	UIShowActionSheet : function(actionSheetID) {
+		$.app.data("ui-action-sheet-id", actionSheetID);
+		$(actionSheetID).UIBlock();
+		var screenCover = $("mask");
+		screenCover.css({width: window.innerWidth, height: window.innerHeight, opacity: ".5"});
+		screenCover.attr("ui-visible-state", "visible");
+		$(actionSheetID).removeClass("hidden");
+		screenCover.bind("touchmove", function(e) {
+			e.preventDefault();
+		});
+	},
+	UIHideActionSheet : function() {
+		var actionSheet = $.app.data("ui-action-sheet-id");
+		$(actionSheet).addClass("hidden");
+		$(actionSheet).UIUnblock();
+		$.app.removeData("ui-action-sheet-id");
+	},
+	UIReadjustActionSheet : function() {
+		var actionSheetID = "";
+		if ($.app.data("ui-action-sheet-id")) {
+			actionSheetID = $.app.data("ui-action-sheet-id");
+			$(actionSheetID).css({right: 0, bottom: 0, left: 0});
+			if ($.iphone || $.ipod) {
+				if ($.standalone) {
+					$(actionSheetID).css({right: 0, bottom: 0, left: 0});
+				} else {
+					if (window.innerWidth > window.innerHeight) {
+					$(actionSheetID).css({right: 0, bottom: 0, left: 0, "-webkit-transform": "translate3d(0,70px,0)"});
+					} else {
+						$(actionSheetID).css({right: 0, bottom: 0, left: 0, "-webkit-transform": "translate3d(0,0,0)"});
+					}
+				}
+			} else {
+				$(actionSheetID).css({right: 0, bottom: 0, left: 0});
+			}
+		}
+		$.UIPositionMask();
+	}
+});
+document.addEventListener("orientationchange", function() {
+	$.UIReadjustActionSheet();
+}, false);
+
+$.fn.UIExpander = function ( opts ) {
+	opts = opts || {};
+	var status = opts.status || "expanded";
+	var title = opts.title || "Open";
+	var altTitle = opts.altTitle || "Close";
+	var expander = this;
+	var panel = $("panel", this);
+	var header = "<header><label></label></header>";
+	this.prepend(header);
+	panel.attr("ui-height", panel.css("height"));
+	if (status === "expanded") {
+		expander.removeClass("ui-status-collapsed");
+		expander.addClass("ui-status-expanded");
+		$("label", this).text(altTitle);
+		panel.height(panel.attr("ui-height"));
+		panel.css(opacity, 1);
+	} else {
+		$("label", this).text(title);
+		panel.css({height: 0, opacity: 0});
+		expander.removeClass("ui-status-expanded");
+		expander.addClass("ui-status-collapsed");
+	}
+	$("header", expander).bind("click", function() {
+		if (panel.height() === 0) {
+			panel.height(panel.attr("ui-height"));
+			panel.css("opacity", 1);
+			$("label", this).text(altTitle);
+			expander.removeClass("ui-status-collapsed");
+			expander.addClass("ui-status-expanded");
+	
+		} else {
+			panel.css({height: 0, opacity: 0});
+			$("label", this).text(title);
+			expander.removeClass("ui-status-expanded");
+			expander.addClass("ui-status-collapsed");
+		}
+	});
+};
+$.fn.UICalculateNumberOfLines = function () {
+	var lineHeight = parseInt($(this).css("line-height"), 10);
+	var height = parseInt($(this).css("height"), 10);
+	var lineNums = Math.floor(height / lineHeight);
+	return lineNums;
+};
+$.fn.UIParagraphEllipsis = function () {
+	var lines = $(this).UICalculateNumberOfLines();
+	$(this)[0].style.WebkitLineClamp = lines;
+};
+$.fn.UIProgressBar = function ( opts ) {
+	opts = opts || {};
+	var className = opts.className || false;
+	var width = opts.width || 100;
+	var speed = opts.speed || 5;
+	var position = opts.position || "after";
+	var margin = opts.margin || "10px auto";
+	var bar = "<progressbar";
+	if (className) {
+		bar += " class='" + className + "'";
+	}
+	bar += " style='width: " + width + "px;";
+	bar += " -webkit-animation-duration: " + speed +"s;";
+	bar += " margin: " + margin + ";'";
+	bar += "></progressbar>";
+	$(this).append(bar);
+};
+$.fn.UIHideNavBarHeader = function ( ) {
+	$(this).css({visibility: "hidden", position: "absolute"});
+};
+$.fn.UIShowNavBarHeader = function ( ) {
+	$(this).css({visibility: "visible", position: "static"});
+};
+$.extend({
+	UIAdjustToolBarTitle : function() {
+		$("navbar h1").each(function(idx, title) {
+			var title = $(title);
+			var availableSpace = window.innerWidth - 20;
+			var siblingLeftWidth = 0;
+			var siblingRightWidth = 0;
+			var subtractableWidth = 0;
+			siblingLeftWidth = title.prev()[0] ? title.prev().width() : 0;
+			siblingRightWidth = title.next()[0] ? title.next().width() : 0;
+			if (siblingLeftWidth > siblingRightWidth) {
+				subtractableWidth = siblingLeftWidth * 2;
+			} else {
+				subtractableWidth = siblingRightWidth * 2;
+			}
+			if((availableSpace - subtractableWidth) < 40) {
+				title.css({display: "none"});
+			} else {
+				title.css({display: "block", width: availableSpace - subtractableWidth - 20});
+			}
+		});
+	}
+});
+$(function() {
+	if ($("splitview").length === 0) {
+		$.UIAdjustToolBarTitle();
+	}
+});
+$(document).bind("orientationchange", function() {
+	if ($("splitview").length === 0) {
+		$.UIAdjustToolBarTitle();
+	}
+});
+$(window).bind("resize", function() {
+	if ($("splitview").length === 0) {
+		$.UIAdjustToolBarTitle();
+	}
+});
+$.fn.UISetTranstionType = function( transtion ) {
+	$(this).attr("ui-transition-type", transtion);
+};
+$.fn.toggleClassName = function( firstClassName, secondClassName ) {
+	if (!$(this).hasClass(firstClassName)) {
+	   $(this).addClass(firstClassName);
+	   $(this).removeClass(secondClassName);
+	} else {
+		$(this).removeClass(firstClassName);
+		$(this).addClass(secondClassName);
+	}
+};
+$.fn.UIFlipSubview = function ( direction ) {
+	var view = $(this).closest("view");
+	direction = direction || "left";
+	view.UISetTranstionType("flip-" + direction);
+	$(this).bind("click", function() {
+		switch (direction) {
+			case "right":
+				view.find("subview:nth-of-type(1)").toggleClassName("flip-right-front-in", "flip-right-front-out");
+				view.find("subview:nth-of-type(2)").toggleClassName("flip-right-back-in", "flip-right-back-out");
+				break;
+			case "left":
+				view.find("subview:nth-of-type(1)").toggleClassName("flip-left-front-in","flip-left-front-out");
+				view.find("subview:nth-of-type(2)").toggleClassName("flip-left-back-in","flip-left-back-out");
+				break;
+			case "top":
+			view.find("subview:nth-of-type(2)").toggleClassName("flip-top-front-in","flip-top-front-out");
+				view.find("subview:nth-of-type(1)").toggleClassName("flip-top-back-in","flip-top-back-out");
+				break;
+			case "bottom":
+				view.find("subview:nth-of-type(2)").toggleClassName("flip-bottom-front-in","flip-bottom-front-out");
+				view.find("subview:nth-of-type(1)").toggleClassName("flip-bottom-back-in","flip-bottom-back-out");
+				break;
+			default:
+				view.find("subview:nth-of-type(1)").toggleClassName("flip-right-front-in","flip-right-front-out");
+				view.find("subview:nth-of-type(2)").toggleClassName("flip-right-back-in","flip-right-back-out");
+		}
+	});
+};
+$.fn.UIPopSubview = function ( ) {
+	var view = $(this).closest("view");
+	view.UISetTranstionType("pop");
+	$(this).bind("click", function() {
+		$("subview:nth-of-type(2)", view).toggleClassName("pop-in","pop-out");	
+	});
+};
+
+$.fn.UIFadeSubview = function ( ) {
+	var view = $(this).closest("view");
+	view.UISetTranstionType("fade");
+	view.attr("ui-transition-type", "fade");
+	$(this).bind("click", function() {
+		$("subview:nth-of-type(2)", view).toggleClassName("fade-in", "fade-out");
+	});
+};
+$.fn.UISpinSubview = function ( direction ) {
+	var view = $(this).closest("view");
+	view.UISetTranstionType("spin");
+	if (!direction || direction === "left") {
+		$(this).UISetTranstionType("left");
+		$(this).bind("click", function() {
+			$("subview:nth-of-type(2)", view).toggleClassName("spin-left-in", "spin-left-out");
+		});
+	} else if (direction === "right") {
+		$(this).UISetTranstionType("right");
+		$(this).bind("click", function() {
+			$("subview:nth-of-type(2)", view).toggleClassName("spin-right-in", "spin-right-out");
+		});
+	} else {
+		$(this).UISetTranstionType("left");
+		$(this).bind("click", function() {
+			$("subview:nth-of-type(2)", view).toggleClassName("spin-left-in", "spin-left-out");
+		});
+	}
+};
+
+$(function() {
+	if ($("rootview").length === 0) {
+		return;
+	}
+	$.extend($, {
+		UISplitViewScroller1 : null,
+		UISplitViewScroller2 : null,
+		body : $("body"),
+		rootview : $("rootview"),
+		resizeEvt : ('onorientationchange' in window ? 'orientationchange' : 'resize'),
+		UISplitView : function ( ) {	
+			$.UISplitViewScroller1 = new iScroll('#scroller1 > scrollpanel');
+			$.UISplitViewScroller2 = new iScroll('#scroller2 > scrollpanel');		
+			var buttonLabel = $("rootview > panel > view[ui-navigation-status=current] > navbar").text();
+			$("detailview > navbar").append("<uibutton id ='showRootView'  class='navigation' ui-bar-align='left'>"
+			+ buttonLabel + "</uibutton>");
+			if (window.innerWidth > window.innerHeight) {
+				$.body[0].className = "landscape";
+				$.rootview.css({display: "block", height: "100%", "margin-bottom": "1px"});
+				$("#scroller1").css({overflow: "hidden", height: ($.rootview[0].innerHeight - 45)});
+			} else {
+				$.bodyp[0].className = "portrait";
+				$.rootview.css({display: "none", height: (window.innerHeight - 100)});
+				$("#scroller1").css({overflow: "hidden", height:(window.innerHeight - 155)});
+			}
+			$("detailview navbar h1").text($("tableview[ui-implements=detail-menu] > tablecell").eq(0).text());
+		},
+
+		UISetSplitviewOrientation : function() {
+			if ($.resizeEvt) {
+				if (window.innerWidth > window.innerHeight) {
+					$.body[0].className = "landscape";
+					$.rootview.css({display: "block", height: "100%", "margin-bottom": "1px"});
+					$("#scroller1").css({overflow: "hidden", height: "100%"});
+				} else {
+					$.body[0].className = "portrait";
+					$.rootview.css({display: "none", height: (window.innerHeight - 100)});
+					$("#scroller1").css({overflow: "hidden", height:(window.innerHeight - 155)});
+				}
+				$.UIEnableScrolling();
+			}
+		},
+
+		UIToggleRootView : function() {
+			if ($.rootview.css("display") === "none") {
+				$.rootview.css("display", "block");
+				$.rootview.UIBlock(".01");
+				$.UISplitViewScroller1.refresh();
+				$.UISplitViewScroller2.refresh();
+			} else {
+				$.rootview.css("display","none");
+				$.rootview.UIUnblock();
+				$.UISplitViewScroller1.refresh();
+				$.UISplitViewScroller2.refresh();
+			}
+		},
+
+		UICheckForSplitView : function ( ) {
+			if ($("splitview")) {
+				$.UISplitView();
+				$("#showRootView").bind("click", function() {
+					$.UIToggleRootView();
+				});
+				$.body.bind("orientationchange", function(){
+					$.UISetSplitviewOrientation();
+				});
+				$(window).bind("resize", function() {
+					$.UISetSplitviewOrientation();
+				});
+			}
+		},
+		UICurrentSplitViewDetail : null
+	});
+	$.UICheckForSplitView();
+	if ($("detailview > subview").length > 0) {
+		$.UICurrentSplitViewDetail = "#";
+		$.UICurrentSplitViewDetail += $("detailview > subview").eq(0).attr("id");
+		$("tableview[ui-implements=detail-menu] > tablecell").bind("click", function() {
+			var rootview = $(this).closest("rootview");
+			if (rootview.css("position") === "absolute") {
+				rootview.css("display","none");
+				$.app.UIUnblock();
+			}
+			var uiHref = $(this).attr("ui-href");
+			uiHref = "#" + uiHref;
+			if (uiHref === $.UICurrentSplitViewDetail) {
+				return;
+			} else {
+				$($.UICurrentSplitViewDetail).css("display","none");
+				$(uiHref).css("display","block");
+				$.UICurrentSplitViewDetail = uiHref;
+				$("detailview navbar h1").text($(this).text());
+				$.UIEnableScrolling();
+			}
+		});
+		$.app.delegate("mask", "click", function() {
+			$.rootview.css("display","none");
+			$.rootview.UIUnblock();
+		});
+	}
+});
+$.extend({
+	determineMaxPopoverHeight : function() {
+		var screenHeight = window.innerHeight;
+		var toolbarHeight;
+		if ($("navbar").length > 0) {
+			toolbarHeight = $("navbar")[0].clientHeight;
+		}
+		if ($("toolbar").length > 0) {
+			if (!$("toolbar").attr('ui-placement')) {
+				toolbarHeight = $("toolbar")[0].clientHeight;
+			}
+		}
+			screenHeight = screenHeight - toolbarHeight;
+			return screenHeight; 
+	},
+	determinePopoverWidth : function() {
+		var screenWidth = window.innerWidth;
+	},
+	adjustPopoverHeight : function( popover ) {
+		var availableVerticalSpace = $.determineMaxPopoverHeight();
+		$(popover + " > section").css({"max-height": (availableVerticalSpace - 100), overflow: "hidden"});
+		var popoverID = popover.split("#");
+		popoverID = popoverID[1];
+	},
+	determinePopoverPosition : function( triggerElement, popoverOrientation, pointerOrientation ) {
+
+		popoverOrientation = popoverOrientation.toLowerCase();
+		pointerOrientation = pointerOrientation.toLowerCase();
+		var trigEl = $(triggerElement);
+		var pos = "";
+		var popoverPos = null;
+		var offset = trigEl.offset();
+		switch (popoverOrientation) {
+			case "top" : 
+				if (pointerOrientation === "left") {
+					popoverPos = offset.left;
+					popoverPos = "left: " + popoverPos;
+				} else if (pointerOrientation === "center") {
+					popoverPos = (offset.left + (trigEl[0].offsetWidth/2) - 160);
+					popoverPos = "left: " + popoverPos;
+				} else {
+					popoverPos = (offset.left + trigEl[0].offsetWidth) - 320;
+					popoverPos = "left: " + popoverPos;
+				}
+				pos = trigEl[0].offsetTop + trigEl[0].offsetHeight;
+				pos += 20;
+				pos =  popoverPos + "px; top: " + pos + "px;";
+				break;
+			case "right" :
+				if (pointerOrientation === "top") {
+					popoverPos = offset.top + 2;
+					popoverPos = "top: " + popoverPos + "px;";
+				} else if (pointerOrientation === "center") {
+					popoverPos = (offset.top - (trigEl[0].offsetHeight/2) - 20);
+					popoverPos = "top: " + popoverPos + "px;";
+				} else {
+					popoverPos = offset.top - trigEl[0].offsetHeight - 20;
+					popoverPos = "top: " + popoverPos + "px;";
+				}
+				pos = offset.left - 330;
+				pos -= 20;
+				pos = popoverPos + " left: " + pos + "px";
+				break;
+			case "bottom" :
+				if (pointerOrientation === "left") {
+					popoverPos = offset.left;
+					popoverPos = "left: " + popoverPos;
+				} else if (pointerOrientation === "center") {
+					popoverPos = (offset.left + (trigEl[0].offsetWidth/2) - 160);
+					popoverPos = "left: " + popoverPos;
+				} else {
+					popoverPos = (offset.left + trigEl[0].offsetWidth) - 320;
+					popoverPos = "left: " + popoverPos;
+				}
+				pos = trigEl[0].offsetTop + trigEl[0].offsetHeight;
+				pos += 20;
+				pos =  popoverPos + "px; bottom: " + pos + "px;";
+				break;
+				break;
+			case "left" :
+				if (pointerOrientation === "top") {
+					popoverPos = offset.top + 2;
+					popoverPos = "top: " + popoverPos + "px;";
+				} else if (pointerOrientation === "center") {
+					popoverPos = (offset.top - (trigEl[0].offsetHeight/2) - 20);
+					popoverPos = "top: " + popoverPos + "px;";
+				} else {
+					popoverPos = offset.top - trigEl[0].offsetHeight - 20;
+					popoverPos = "top: " + popoverPos + "px;";
+				}
+				pos = offset.left + trigEl[0].offsetWidth;
+				pos += 20;
+				pos = popoverPos + " left: " + pos + "px";
+				break;
+			default :
+				pos = offset.top + trigEl[0].offsetHeight;
+				popoverPos = "left: " + popoverPos;
+				pos += 20;
+				pos = popoverPos + "px; top: " + pos + "px;";
+				break;
+		}
+		return pos;
+	},
+	UIPopover : function( opts ) {
+		var title;
+		var triggerElement = opts.triggerElement;
+		var popoverOrientation = opts.popoverOrientation;
+		var pointerOrientation = opts.pointerOrientation;
+		var popoverID;
+		if (opts) { 
+			popoverID = 'id="' + opts.id + '"' || $.UIUuid();
+			title = '<h3>'+ opts.title + '</h3>' || "";
+		} else {
+			popoverID = "";
+			title = "";
+		}
+		var trigEl = $(triggerElement);
+		var pos = this.determinePopoverPosition(triggerElement, popoverOrientation, pointerOrientation);
+		pos = " style='" + pos + "'";
+		var popoverShell = 
+			'<popover ' + popoverID + ' ui-pointer-position="' + popoverOrientation + '-' + pointerOrientation + '"' 
+			+ pos + ' data-popover-trigger="#' + trigEl.attr("id") + '" data-popover-orientation="' + popoverOrientation + '" data-popover-pointer-orientation="' + pointerOrientation + '">\n' + 
+				'<header>'+ title 
+		
+				+ '</header>\n'
+				+ '<section><scrollpanel class="popover-content"></scrollpanel></section>\n'
+			+'</popover>';
+		var newPopover = $(popoverShell);
+		$.app.append(newPopover);
+		// Adjust the left or bottom position of the popover if it is beyond the viewport:
+		if (!!opts.id) {
+			$.adjustPopoverHeight("#" + opts.id);
+			$("#" + opts.id).adjustPopoverPosition();
+		}
+	},
+	UICancelPopover : function (popover) {
+		$.UIHidePopover(popover);
+	},
+	UIHidePopover : function (popover) {
+		$.UIPopover.activePopover = null;
+		$(popover).css("opacity: 0; -webkit-transform: scale(0);");
+		popover.UIUnblock();
+	},
+	UIEnablePopoverScrollpanels : function ( options ) {
+		try {
+			var count = 0;
+			$$("popover scrollpanel").forEach(function(item) {
+				item.setAttribute("ui-scroller", $.UIUuid());
+				var whichScroller = item.getAttribute("ui-scroller");
+				$.UIScrollers[whichScroller] = new iScroll(item.parentNode, options);
+			});
+		} catch(e) { }
+	}
+});
+$.fn.UIScroll = function() {
+	var scrollpanel = $(this).find("section");
+	if (scrollpanel.data("ui-scroller")) {
+		scrollpanel.data("ui-scroller").refresh();
+	} else {
+		scrollpanel[0]
+		var scroller = new iScroll(scrollpanel[0],{vScrollbar:false});
+		scrollpanel.data("ui-scroller", scroller);
+	}
+};
+$.extend($.UIPopover, {
+	activePopover : null,
+	show : function ( popover ) {
+		if ($.UIPopover.activePopover === null) {
+			$.app.UIBlock(".01");
+			popover.repositionPopover();
+			popover.css({"opacity": 1, "-webkit-transform": "scale(1)"});
+			$.UIPopover.activePopover = popover.attr("id");
+	
+			popover.UIScroll();
+		} else {
+			return;
+		}
+		$.UIEnablePopoverScrollpanels({ desktopCompatibility: true });
+	},
+	hide : function ( popover ) {
+		if ($.UIPopover.activePopover) {
+			popover.css({"opacity": 0, "-webkit-transform": "scale(0)"});
+			$.UIPopover.activePopover = null;
+		}
+	}
+});
+$.fn.repositionPopover = function() {
+	var triggerElement = $(this).attr("data-popover-trigger"); 
+	var popoverOrientation = $(this).attr("data-popover-orientation");
+	var pointerOrientation = $(this).attr("data-popover-pointer-orientation");
+	var popoverPos = $.determinePopoverPosition(triggerElement, popoverOrientation, pointerOrientation);
+	$(this).css(popoverPos);
+};
+$.fn.adjustPopoverPosition = function() {
+	var screenHeight = window.innerHeight;
+	var screenWidth = window.innerWidth;
+	var popoverHeight = this.offsetHeight;
+	var popoverWidth = this.offsetWidth;
+	var offset = $(this).offset();
+	var popoverTop = offset.top;
+	var popoverLeft = offset.left;
+	var bottomLimit = popoverTop + popoverHeight;
+	var rightLimit = popoverLeft + popoverWidth;
+	if (bottomLimit > screenHeight) {
+		this.style.top	= screenHeight - popoverHeight - 10 + "px";
+	}
+	if (rightLimit > screenWidth) {
+		this.style.left = screenWidth - 10 + "px";
+	}
+};
+// Hide any visible popovers when orientation changes.
+$(window).bind("orientationchange", function() {
+	var availableVerticalSpace = $.determineMaxPopoverHeight();
+	$("popover").each(function(idx, popover) {
+		$(popover).find("section").css({"max-height": (availableVerticalSpace - 100)});
+		popover.repositionPopover();
+		$.adjustPopoverHeight("#" + popover.attr("id"));
+	});
+	if ($("rootview")) {
+		$("rootview").UIUnblock();
+	}
+});
+
+// Hide any visible popovers when orientation changes.
+$(window).bind("resize", function() {
+	var availableVerticalSpace = $.determineMaxPopoverHeight();
+	$("popover").each(function(idx, popover) {
+		$(popover).find("section").css({"max-height": (availableVerticalSpace - 100)});
+
+		$(popover).repositionPopover();
+	});
+});
+
+$(function() {
+	$.app.delegate("mask", "click", function() {
+		if ($.UIPopover.activePopover) {
+			$.UIPopover.hide($("#"+$.UIPopover.activePopover));
+			if ($("mask")) {
+				$("mask").UIUnblock();
+			}
+		}
+		if ($.rooview && $.rootview.css("position") === "absolute") {
+			$.rootview.style.display = "none";
+			$.rootview.UIUnblock();
+		}
+	});
+});
+$.fn.UIBlock = function ( opacity ) {
+	opacity = opacity ? " style='opacity:" + opacity + "'" : "";
+	$(this).prepend("<mask" + opacity + "></mask>");
+};
+$.fn.UIUnblock = function ( ) {
+	if ($("mask")) {
+		$("mask").remove();
+	}
+};
+$.extend({
+	UIPositionMask : function() {
+		if ($("mask").length > 0) {
+			$("mask").css({"height": + (window.innerHeight + window.pageYOffset), width : + window.innerWidth});
+		}
+	}
+});
+$(function() {
+	if ($("tableview[ui-kind='titled-list alphabetical']").length > 0) {
+		
+		$("tableview[ui-kind='titled-list alphabetical']").closest("scrollpanel").data("ui-scroller").destroy();
+		
+	}
+});
+
 })(jQuery);
