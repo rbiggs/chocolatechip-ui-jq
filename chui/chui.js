@@ -226,9 +226,24 @@ $.extend({
 			toolbar: toolbar,
 			callback: callback
 		} */
-		var label1 = options.editButton[0] || "Edit";
-		var label2 = options.editButton[1] || "Done";
-		var label3 = options.deleteButton || "Delete";
+		var label1;
+		if (options.editButton) {
+			label1 = options.editButton[0];
+		} else {
+			label1 = "Edit";
+		}
+		var label2;
+		if (options.editButton) {
+			label2 = options.editButton[1];
+		} else {
+			label2 = "Done";
+		}
+		var label3;
+		if (options.deleteButton) {
+			label3 = options.deleteButton;
+		} else {
+			label3 = "Delete";
+		}
 		var selector = $(options.selector);
 		this.deletionList = [];
 		var listEl = $(options.selector);
@@ -254,7 +269,7 @@ $.extend({
 				   listEl.addClass("ui-show-delete-disclosures");
 				   $(this).siblings("uibutton[ui-implements='delete']").css("display","-webkit-inline-box");
 				   $("tablecell > img", listEl).each(function() {
-						$(this).css("-webkit-transform: translate3d(40px, 0, 0)");
+						$(this).css("-webkit-transform","translate3d(40px, 0, 0)");
 				   });
 			   } else {
 				   $(this).UIToggleButtonLabel(label1, label2);
@@ -267,26 +282,24 @@ $.extend({
 				   });
 				   $("uibutton[ui-implements=delete]").addClass("disabled");
 		   
-				   listEl.find("tablecell > img").css("-webkit-transform: translate3d(0, 0, 0)");
+				   listEl.find("tablecell > img").css("-webkit-transform","translate3d(0, 0, 0)");
 			   }
 		   });
 		};
 		var UIDeleteDisclosureSelection = function() {
-			$("deletedisclosure").each(function() {
-				$(this).bind("click", function() {
-					$(this).toggleClass("checked");
-					$(this).closest("tablecell").toggleClass("deletable");
-					$("uibutton[ui-implements=delete]").removeClass("disabled");
-					if (!$(this).closest("tablecell").hasClass("deletable")) {
-						listEl.attr("data-deletable-items", parseInt(listEl.data("deletable-items"), 10) - 1);
-						if (parseInt(listEl.data("deletable-items"), 10) === 0) {
-							toolbarEl.children().eq(0).addClass("disabled");
-						}
-					} else {
-						listEl.data("deletable-items", parseInt(listEl.data("deletable-items"), 10) + 1);
+			$("deletedisclosure").bind("click", function() {
+				$(this).toggleClass("checked");
+				$(this).closest("tablecell").toggleClass("deletable");
+				$("uibutton[ui-implements=delete]").removeClass("disabled");
+				if (!$(this).closest("tablecell").hasClass("deletable")) {
+					listEl.attr("data-deletable-items", parseInt(listEl.attr("data-deletable-items"), 10) - 1);
+					if (parseInt(listEl.attr("data-deletable-items"), 10) === 0) {
+						toolbarEl.find("uibutton[ui-implements=delete]").addClass("disabled");
 					}
-				}); 
-			});
+				} else {
+					listEl.attr("data-deletable-items", parseInt(listEl.attr("data-deletable-items"), 10) + 1);
+				}
+			}); 
 		};
 
 		var UIDeletionExecution = function() {
@@ -928,6 +941,7 @@ $.extend($, {
 		$.app.removeData("ui-action-sheet-id");
 	},
 	UIReadjustActionSheet : function() {
+		if ($("actionsheet").length > 0) {
 		var actionSheetID = "";
 		if ($.app.data("ui-action-sheet-id")) {
 			actionSheetID = $.app.data("ui-action-sheet-id");
@@ -947,6 +961,7 @@ $.extend($, {
 			}
 		}
 		$.UIPositionMask();
+		}
 	}
 });
 document.addEventListener("orientationchange", function() {
@@ -1431,7 +1446,7 @@ $.fn.repositionPopover = function() {
 	var popoverOrientation = $(this).attr("data-popover-orientation");
 	var pointerOrientation = $(this).attr("data-popover-pointer-orientation");
 	var popoverPos = $.determinePopoverPosition(triggerElement, popoverOrientation, pointerOrientation);
-	$(this).css(popoverPos);
+	$(this)[0].style.cssText += popoverPos;
 };
 $.fn.adjustPopoverPosition = function() {
 	var screenHeight = window.innerHeight;
@@ -1450,20 +1465,22 @@ $.fn.adjustPopoverPosition = function() {
 		this.style.left = screenWidth - 10 + "px";
 	}
 };
-// Hide any visible popovers when orientation changes.
+// Reposition any visible popovers when orientation changes.
 $(window).bind("orientationchange", function() {
 	var availableVerticalSpace = $.determineMaxPopoverHeight();
-	$("popover").each(function(idx, popover) {
-		$(popover).find("section").css({"max-height": (availableVerticalSpace - 100)});
-		popover.repositionPopover();
-		$.adjustPopoverHeight("#" + popover.attr("id"));
-	});
-	if ($("rootview")) {
-		$("rootview").UIUnblock();
+	if ($("popover").length > 0) {
+		$("popover").each(function(idx, popover) {
+			$(popover).find("section").css({"max-height": (availableVerticalSpace - 100)});
+			$(popover).repositionPopover();
+			$.adjustPopoverHeight("#" + $(popover).attr("id"));
+		});
+		if ($("rootview").length > 0) {
+			$("rootview").UIUnblock();
+		}
 	}
 });
 
-// Hide any visible popovers when orientation changes.
+// Reposition any visible popovers when window resizes.
 $(window).bind("resize", function() {
 	var availableVerticalSpace = $.determineMaxPopoverHeight();
 	$("popover").each(function(idx, popover) {
@@ -1492,7 +1509,7 @@ $.fn.UIBlock = function ( opacity ) {
 	$(this).prepend("<mask" + opacity + "></mask>");
 };
 $.fn.UIUnblock = function ( ) {
-	if ($("mask")) {
+	if ($("mask").length > 0) {
 		$("mask").remove();
 	}
 };
@@ -1501,13 +1518,6 @@ $.extend({
 		if ($("mask").length > 0) {
 			$("mask").css({"height": + (window.innerHeight + window.pageYOffset), width : + window.innerWidth});
 		}
-	}
-});
-$(function() {
-	if ($("tableview[ui-kind='titled-list alphabetical']").length > 0) {
-		
-		$("tableview[ui-kind='titled-list alphabetical']").closest("scrollpanel").data("ui-scroller").destroy();
-		
 	}
 });
 
