@@ -1,0 +1,106 @@
+[
+	{
+		"title" : "Muy Lejos De Ti",
+		"artist" : "Alejandro Fernandez",
+		"album" : "A Corazon Abierto",
+		"year" : "2004",
+		"genre" : "Latin",
+		"image": "images/song_images/Muy_Lejos_De_Ti.png"
+	},
+	{
+		"title" : "Since You Brought It Up",
+		"artist" : "James Otto",
+		"album" : "Since You Brought It Up",
+		"year" : "2009",
+		"genre" : "Country",
+		"image": "images/song_images/Since_You_Brought_It_Up.png"
+	},
+	{
+		"title" : "La Locura Del Amor",
+		"artist" : "David Bustamante",
+		"album" : "Al Filo De La Irreadlidad",
+		"year" : "2007",
+		"genre" : "Latin",
+		"image": "images/song_images/La_Locura_Del_Amor.png"
+	},
+	{
+		"title" : "Como Dos Tontos",
+		"artist" : "Christian Castro",
+		"album" : "El Culpable Soy Yo",
+		"year" : "2009",
+		"genre" : "Latin",
+		"image": "images/song_images/Como_Dos_Tontos.png"
+	},
+	{
+		"title" : "Se Que Perdi",
+		"artist" : "Yahir",
+		"album" : "Elemental",
+		"year" : "2009",
+		"genre" : "Latin",
+		"image": "images/song_images/Se_Que_Perdi.png"
+	},
+	{
+		"title" : "A Love Like This",
+		"artist" : "Sawyer Brown",
+		"album" : "Six Days On The Road",
+		"year" : "1997",
+		"genre" : "Country",
+		"image": "images/song_images/A_Love_Like_This.png"
+	},
+	{
+		"title" : "'Til The Last Shot's Fired",
+		"artist" : "Trace Atkins",
+		"album" : "X (Ten)",
+		"year" : "2008",
+		"genre" : "Country",
+		"image": "images/song_images/Til_The_Last_Shots_Fired.png"
+	},
+	{
+		"title" : "Amor Prohibido",
+		"artist" : "Thalia",
+		"album" : "El Sexto Sentido",
+		"year" : "2005",
+		"genre" : "Latin",
+		"image": "images/song_images/Amor_Prohibido.png"
+	},
+	{
+		"title" : "That's Why I'm Here",
+		"artist" : "Kenny Chesney",
+		"album" : "Greatest Hits",
+		"year" : "2000",
+		"genre" : "Country",
+		"image": "images/song_images/Thats_Why_Im_Here.png"
+	},
+	{
+		"title" : "She Don't Know She's Beautiful",
+		"artist" : "Sammy Kershaw",
+		"album" : "The Hits",
+		"year" : "1995",
+		"genre" : "Country",
+		"image": "images/song_images/She_Dont_Know_Shes_Beautiful.png"
+	},
+	{
+		"title" : "Todavia",
+		"artist" : "Alexandre Pires",
+		"album" : "Estrella Guia",
+		"year" : "2003",
+		"genre" : "Latin",
+		"image": "images/song_images/Todavia.png"
+	},
+	{
+		"title" : "Y Tu Te Vas",
+		"artist" : "Cheyenne",
+		"album" : "Cheyenne: Grandes Exitos",
+		"year" : "2002",
+		"genre" : "Latin",
+		"image": "images/song_images/Y_Tu_Te_Vas.png"
+	},
+	{
+		"title" : "I Wanna Make You Close Your Eyes",
+		"artist" : "Dierks Bentley",
+		"album" : "Feel That Fire",
+		"year" : "2009",
+		"genre" : "Country",
+		"image": "images/song_images/I_Wanna_Make_You_Close_Your_Eyes.png"
+	}
+]

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0;">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Tableviews 1</title>
+    <link rel="stylesheet" href="../chui/chui.css">
+    <style>
+    	tablecell[ui-usage="image"] > img {
+			margin-top: 8px;
+			margin-bottom: 40px;
+		}
+		tableview[ui-tablecell-order="stacked"] > tablecell[ui-usage="image"] > img + celltitle,
+		tableview[ui-tablecell-order="stacked"] > tablecell[ui-usage="image"] > img + celltitle + cellsubtitle {
+			width: 75% !important;
+		}
+		#view2 tablecell> celltitle {
+			width: 95% !important;
+		}
+		#view2 tablecell ul > li {
+			list-style: square;
+		}
+		body.landscape #view1 tableview[ui-tablecell-order="stacked"] > tablecell > cellsubtitle, 
+		body.landscape #view1 tableview[ui-tablecell-order="stacked"] > tablecell > celldetail {
+			font-size: 12px !important;
+		}
+		#view2 tablecell > celldetail  {
+			font-size: 16px !important;
+			line-height: 20px;
+		}
+    </style>
+	    <script src="../chui/jquery-1.6.4.js"></script>
+		<script src="../chui/jquery.tmpl.js"></script>
+	    <script src="../chui/chui.js"></script>
+	    <script src="../chui/iscroll.js"></script>
+    <script>
+    	$(function() {
+			$.template("customersTmpl", 
+			"<tablecell>\
+	        	<celltitle>${ firstName } ${ lastName }</celltitle>\
+				<cellsubtitle>${ address }</cellsubtitle>\
+	            <celldetail>${ description }</celldetail>\
+	    	</tablecell>");
+			$.template("recipes_ingredientsTmpl",
+			    "<cellsubtitle>\
+                    <div>Ingredients</div>\
+	                  <ul>\
+						{{each ingredients}}\
+	                   		<li>${$value}</li>\
+						{{/each}}\
+                    </ul>\
+                </cellsubtitle>");
+            $.template("recipes_directionsTmpl",
+                "<celldetail>\
+                    <div>Directions</div>\
+                    <ol>\
+						{{each ingredients}}\
+	                   		<li>${$value}</li>\
+						{{/each}}\
+                    </ol>\
+                </celldetail>");
+			$.template("recipesTmpl", 
+				"<tablecell>\
+					<celltitle>${ title }</celltitle>\
+                    {{tmpl 'recipes_ingredientsTmpl'}}\
+					{{tmpl 'recipes_directionsTmpl'}}\
+					</tablecell>");
+			$.template("songsTmpl", 
+				"{{if genre === 'Latin'}}\
+					<tablecell ui-usage='image'>\
+ 	               		<img src='${ image }'>\
+	                	<celltitle>${ title }</celltitle>\
+	                	<cellsubtitle>${ artist }</cellsubtitle>\
+	                	<cellsubtitle>${ album }</cellsubtitle>\
+	                	<cellsubtitle>${ year }</cellsubtitle>\
+	                	<cellsubtitle>${ genre }</cellsubtitle>\
+		    		</tablecell>\
+				{{/if}}");
+			$.getJSON("customers.json", function(data) {
+				$('#view1 tableview').empty();
+		    	$.tmpl("customersTmpl", data).appendTo('#view1 tableview');
+				// Re-initialize the scrollpanels for new data:
+				$("#view1 scrollpanel").data("ui-scroller").destroy();
+				$("#view1 scrollpanel").data("ui-scroller", new iScroll('#view1 scrollpanel'));
+	        });	
+			$.getJSON("recipes.json", function(data) {
+				$('#view2 tableview').empty();
+			    $.tmpl("recipesTmpl", data).appendTo('#view2 tableview');
+				// Re-initialize the scrollpanels for new data:
+				$("#view2 scrollpanel").data("ui-scroller").destroy();
+				$("#view2 scrollpanel").data("ui-scroller", new iScroll('#view2 scrollpanel'));
+	        });
+			$.getJSON("songs.json", function(data) {
+				$('#view3 tableview').empty();
+			    $.tmpl("songsTmpl", data).appendTo('#view3 tableview');
+				// Re-initialize the scrollpanels for new data:
+				$("#view3 scrollpanel").data("ui-scroller").destroy();
+				$("#view3 scrollpanel").data("ui-scroller", new iScroll('#view3 scrollpanel'));
+	        });
+		});
+    </script>
+</head>
+<body>
+	<app ui-background-style="striped">
+		<view id="main" ui-background-style="striped" ui-navigation-status="current">
+			<navbar>
+				<h1>Tableview</h1>
+			</navbar>
+			<subview ui-associations="withNavBar">
+				<scrollpanel>
+					<tableview>
+						<tablecell href="#view1" ui-implements="disclosure">
+							<celltitle>Customers</celltitle>
+						</tablecell>
+						<tablecell href="#view2" ui-implements="disclosure">
+							<celltitle>Recipes</celltitle>
+						</tablecell>
+						<tablecell href="#view3" ui-implements="disclosure">
+							<celltitle>Songs</celltitle>
+						</tablecell>
+					</tableview>
+				</scrollpanel>
+			</subview>
+		</view>
+		<view id="view1" ui-navigation-status="upcoming" ui-background-style="vertical-striped">
+			<navbar>
+				<uibutton ui-implements="back" ui-bar-align="left">Back</uibutton>
+				<h1>First View</h1>
+			</navbar>
+			<subview ui-associations="withNavBar">
+				<scrollpanel>
+					<tableview ui-kind="grouped" ui-tablecell-order="stacked">
+						<tablecell>
+							<celltitle>This is One</celltitle>
+							<cellsubtitle>a subtitle to bore you</cellsubtitle>
+							<celldetail>Lorem ipsum dolor sit amet. Requitor empremitum salarium epsiquantis.</celldetail>
+						</tablecell>
+					</tableview>
+				</scrollpanel>
+			</subview>
+		</view>
+		<view id="view2" ui-navigation-status="upcoming" ui-background-style="vertical-striped">
+			<navbar>
+				<uibutton ui-implements="back" ui-bar-align="left">Back</uibutton>
+				<h1>Second View</h1>
+			</navbar>
+			<subview ui-associations="withNavBar">
+				<scrollpanel>
+					<tableview ui-kind="grouped" ui-tablecell-order="stacked">
+						<tablecell>
+							<celltitle>This is Two</celltitle>
+							<cellsubtitle>a typical subtitle</cellsubtitle>
+							<celldetail>Lorem ipsum dolor sit amet. Requitor empremitum salarium epsiquantis.</celldetail>
+						</tablecell>
+					</tableview>
+				</scrollpanel>
+			</subview>
+		</view>
+		<view id="view3" ui-navigation-status="upcoming" ui-background-style="vertical-striped">
+			<navbar>
+				<uibutton ui-implements="back" ui-bar-align="left">Back</uibutton>
+				<h1>Third View</h1>
+			</navbar>
+			<subview ui-associations="withNavBar">
+				<scrollpanel>
+					<tableview ui-kind="grouped" ui-tablecell-order="stacked">
+						<tablecell>
+							<celltitle>This is THREE!</celltitle>
+							<cellsubtitle>another dumb subtitle</cellsubtitle>
+							<celldetail>Lorem ipsum dolor sit amet. Requitor empremitum salarium epsiquantis.</celldetail>
+						</tablecell>
+					</tableview>
+				</scrollpanel>
+			</subview>
+		</view>
+	</app>
+</body>
+</html>
