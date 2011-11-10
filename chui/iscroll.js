@@ -175,6 +175,9 @@ iScroll.prototype = {
 		switch(e.type) {
 			case START_EV:
 				if (!hasTouch && e.button !== 0) return;
+				if (!hasTouch && e.input !== 0) return;
+				if (!hasTouch && e.select !== 0) return;
+				if (!hasTouch && e.textarea !== 0) return;
 				if (!hasTouch && !that.options.mouseGestures) return;
 				that._start(e);
 				break;
