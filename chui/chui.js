@@ -470,7 +470,7 @@ $.extend({
 		</popup>';
 		$.app.append(popup);
 		var popupID = "#" + id;
-		$(popupID).UIBlock("0.5");
+		$.app.UIBlock("0.5");
 		var popupBtn = "#" + id + " uibutton";
 		$(popupBtn).bind("click", cancelClickPopup = function(e) {
 			if ($(this).attr("ui-implements")==="continue") {
@@ -759,7 +759,7 @@ $.fn.UICreateSegmentedControl = function(opts) {
 		segmentedControl += " ui-segmented-container='#" + opts.container + "'";
 	}
 	var segClass = opts.cssClass || "";
-	segmentedControl += "'>";
+	segmentedControl += ">";
 	if (opts.numberOfSegments) {
 		segments = opts.numberOfSegments;
 		var count = 1;

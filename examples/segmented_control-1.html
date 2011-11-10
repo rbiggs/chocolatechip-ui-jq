@@ -33,11 +33,11 @@
 				 selectedSegment : 2,
 				 cssClass : ["ui-custom-tint", "ui-custom-tint", "ui-custom-tint", "ui-custom-tint"],
 				 imagePath : "icons/",
-				 container : "#stack_01"
+				 container : "stack_01"
 			};
 			$("scrollpanel > stack:first-of-type").UICreateSegmentedControl(seg);
 			var logChildNodes = function(button) {
-				console.log("The child position is: " + $(button).attr("ui-child-position"));
+				console.log("The child position is: " + button.attr("ui-child-position"));
 			}
 			$("segmentedcontrol").UISegmentedControl("#stack_01", logChildNodes);
 		});

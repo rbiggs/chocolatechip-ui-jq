@@ -3701,7 +3701,6 @@ popover > section {
     background-color: #fff;
     margin: 0px 5px 5px 5px !important; 
     -webkit-border-radius: 5px;
-    sborder: solid 1px transparent;
     min-height: 50px;
     position: relative;
     z-index: 1000;

@@ -54,9 +54,8 @@ var m = Math,
 		var that = this,
 			doc = document,
 			i;
-		
-		that.wrapper = null;
-		that.wrapper = typeof el == 'object' ? el : doc.querySelector(el).parentNode;
+
+		that.wrapper = typeof el == 'object' ? el.parentNode : doc.querySelector(el).parentNode;
 		that.wrapper.style.overflow = 'hidden';
 		that.scroller = that.wrapper.children[0];
 
@@ -175,9 +174,9 @@ iScroll.prototype = {
 		switch(e.type) {
 			case START_EV:
 				if (!hasTouch && e.button !== 0) return;
-				if (!hasTouch && e.input !== 0) return;
-				if (!hasTouch && e.select !== 0) return;
-				if (!hasTouch && e.textarea !== 0) return;
+				if (!hasTouch && e.target.tagName === "INPUT") return;
+				if (!hasTouch && e.target.tagName === "SELECT") return;
+				if (!hasTouch && e.target.tagName === "TEXTAREA") return;
 				if (!hasTouch && !that.options.mouseGestures) return;
 				that._start(e);
 				break;
@@ -794,12 +793,11 @@ iScroll.prototype = {
 	_offset: function (el) {
 		var left = -el.offsetLeft,
 			top = -el.offsetTop;
-		try {
-			while (el = el.offsetParent) {
-				left -= el.offsetLeft;
-				top -= el.offsetTop;
-			}
-		} catch(err) { }
+			
+		while (el = el.offsetParent) {
+			left -= el.offsetLeft;
+			top -= el.offsetTop;
+		}
 		
 		if (el != this.wrapper) {
 			left *= this.scale;
@@ -992,18 +990,11 @@ iScroll.prototype = {
 		pos = that._offset(el);
 		pos.left += that.wrapperOffsetLeft;
 		pos.top += that.wrapperOffsetTop;
+
 		pos.left = pos.left > 0 ? 0 : pos.left < that.maxScrollX ? that.maxScrollX : pos.left;
 		pos.top = pos.top > that.minScrollY ? that.minScrollY : pos.top < that.maxScrollY ? that.maxScrollY : pos.top;
-		/*if (pos.top > that.minScrollY) {
-			pos.top = that.minScrollY;
-		} else {
-			if (pos.top < that.maxScrollY) {
-				pos.top = that.maxScrollY;
-			} else {
-				pos.top = pos.top;
-			}
-		}*/
 		time = time === undefined ? m.max(m.abs(pos.left)*2, m.abs(pos.top)*2) : time;
+
 		that.scrollTo(pos.left, pos.top, time);
 	},
 
