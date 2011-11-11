@@ -115,7 +115,9 @@
 			font-weight: bold;
 			text-align: center;
 		}
-		.landscape splitview navbar uibutton.navigation {
+		.landscape splitview navbar uibutton.navigation, 
+		body.SplitViewFixed.portrait splitview navbar uibutton.navigation, 
+		body.SplitViewFixed.landscape splitview navbar uibutton.navigation {
 			display: none;
 		}
 		body.portrait rootview {
@@ -123,7 +125,7 @@
 			position: absolute;
 			top: 44px;
 			left: 10px;
-			z-index: 10000;
+			z-index: 100000;
 			height: 100%;
 			border-radius: 6px 6px;
 			-webkit-box-shadow: 0 0 10px #000;
@@ -199,7 +201,8 @@
 		});
 	</script>
 </head>
-<body>
+<!-- If you put a class of "SplitViewFixed" on the body tag, the spitview will not hide the left side rootview in portrait mode. -->
+<body class="SplitViewFixed">
 	<app>
 	<splitview>
 		<rootview>

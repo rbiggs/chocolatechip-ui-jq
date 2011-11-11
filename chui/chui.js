@@ -925,7 +925,7 @@ $.fn.UIActionSheet = function(opts) {
 $.extend($, {
 	UIShowActionSheet : function(actionSheetID) {
 		$.app.data("ui-action-sheet-id", actionSheetID);
-		$(actionSheetID).UIBlock();
+		$.app.UIBlock();
 		var screenCover = $("mask");
 		screenCover.css({width: window.innerWidth, height: window.innerHeight, opacity: ".5"});
 		screenCover.attr("ui-visible-state", "visible");
@@ -1159,23 +1159,30 @@ $(function() {
 		return;
 	}
 	$.extend($, {
+		UICancelSplitViewToggle : function () {
+			$.body.addClass("SplitViewFixed");
+		},
 		UISplitViewScroller1 : null,
 		UISplitViewScroller2 : null,
-		body : $("body"),
 		rootview : $("rootview"),
 		resizeEvt : ('onorientationchange' in window ? 'orientationchange' : 'resize'),
 		UISplitView : function ( ) {	
+			if ($.body.hasClass("SplitViewFixed")) {
+				return;
+			}
 			$.UISplitViewScroller1 = new iScroll('#scroller1 > scrollpanel');
 			$.UISplitViewScroller2 = new iScroll('#scroller2 > scrollpanel');		
 			var buttonLabel = $("rootview > panel > view[ui-navigation-status=current] > navbar").text();
 			$("detailview > navbar").append("<uibutton id ='showRootView'  class='navigation' ui-bar-align='left'>"
 			+ buttonLabel + "</uibutton>");
 			if (window.innerWidth > window.innerHeight) {
-				$.body[0].className = "landscape";
+				$.body.addClass("landscape");
+				$.body.removeClass("portrait");
 				$.rootview.css({display: "block", height: "100%", "margin-bottom": "1px"});
 				$("#scroller1").css({overflow: "hidden", height: ($.rootview[0].innerHeight - 45)});
 			} else {
-				$.bodyp[0].className = "portrait";
+				$.body.addClass("portrait");
+				$.body.removeClass("landscape");
 				$.rootview.css({display: "none", height: (window.innerHeight - 100)});
 				$("#scroller1").css({overflow: "hidden", height:(window.innerHeight - 155)});
 			}
@@ -1183,13 +1190,18 @@ $(function() {
 		},
 
 		UISetSplitviewOrientation : function() {
+			if ($.body.hasClass("SplitViewFixed")) {
+				return;
+			}
 			if ($.resizeEvt) {
 				if (window.innerWidth > window.innerHeight) {
-					$.body[0].className = "landscape";
+					$.body.addClass("landscape");
+					$.body.removeClass("portrait");
 					$.rootview.css({display: "block", height: "100%", "margin-bottom": "1px"});
 					$("#scroller1").css({overflow: "hidden", height: "100%"});
 				} else {
-					$.body[0].className = "portrait";
+					$.body.addClass("portrait");
+					$.body.removeClass("landscape");
 					$.rootview.css({display: "none", height: (window.innerHeight - 100)});
 					$("#scroller1").css({overflow: "hidden", height:(window.innerHeight - 155)});
 				}
@@ -1198,20 +1210,26 @@ $(function() {
 		},
 
 		UIToggleRootView : function() {
+			if ($.body.hasClass("SplitViewFixed")) {
+				return;
+			}
 			if ($.rootview.css("display") === "none") {
 				$.rootview.css("display", "block");
-				$.rootview.UIBlock(".01");
+				$.app.UIBlock(".01");
 				$.UISplitViewScroller1.refresh();
 				$.UISplitViewScroller2.refresh();
 			} else {
 				$.rootview.css("display","none");
-				$.rootview.UIUnblock();
+				$.app.UIUnblock();
 				$.UISplitViewScroller1.refresh();
 				$.UISplitViewScroller2.refresh();
 			}
 		},
 
 		UICheckForSplitView : function ( ) {
+			if ($.body.hasClass("SplitViewFixed")) {
+				return;
+			}
 			if ($("splitview")) {
 				$.UISplitView();
 				$("#showRootView").bind("click", function() {
@@ -1251,7 +1269,7 @@ $(function() {
 		});
 		$.app.delegate("mask", "click", function() {
 			$.rootview.css("display","none");
-			$.rootview.UIUnblock();
+			$.app.UIUnblock();
 		});
 	}
 });
