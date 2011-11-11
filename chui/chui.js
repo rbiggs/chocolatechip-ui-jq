@@ -1,3 +1,17 @@
+/*
+	pO\		
+   6  /\
+	 /OO\
+	/OOOO\
+  /OOOOOOOO\
+ ((OOOOOOOO))
+  \:~=++=~:/   
+ 
+ChocolateChip-UI for jQuery
+Copyright 2011 Robert Biggs: www.chocolatechip-ui.com
+License: BSD
+Version: 1.0
+*/
 (function($) {
 
 $(function() {
