@@ -54,7 +54,7 @@
 				status : "on",
 				value : "sort of working",
 				callback : function(item) {
-					if (item.checked === false) {
+					if (item.find("input")[0].checked === false) {
 						console.log("This is on!");
 					} else {
 						console.log("This is turned off!!!");

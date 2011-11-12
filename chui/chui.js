@@ -584,18 +584,17 @@ $.fn.UISwitchControl = function (callback) {
 	callback = callback || function() { return false; };
 	if ($(this)[0].nodeName.toLowerCase()==="switchcontrol") {
 		callback.call(callback, this);
-		if ($(this).hasClass("on")) {
-			$(this).removeClass("on").addClass("off");
-			$(this).find("input").prop("checked","true");
+		if ($(this).hasClass("off")) {
+			$(this).toggleClassName("on", "off");
+			$(this).find("input")[0].checked = true;
+			$(this).find("thumb").focus();
 		} else {
-			$(this).removeClass("off").addClass("on");
-			$(this).find("input").prop("checked", "false");
+			$(this).toggleClassName("on", "off");
+			$(this).find("input")[0].checked = false;
 		}
-		$(this).find("thumb").focus();
 	} else {
-		return false;
+		return;
 	}
-	return this;
 };
 $.fn.UIInitSwitchToggling = function() {
 	$("switchcontrol", $(this)).each(function(idx) {
@@ -1213,7 +1212,9 @@ $(function() {
 					$.body.removeClass("portrait");
 					$.rootview.css({display: "block", height: "100%", "margin-bottom": "1px"});
 					$("#scroller1").css({overflow: "hidden", height: "100%"});
+					$.app.UIUnblock();
 				} else {
+					$.app.UIUnblock();
 					$.body.addClass("portrait");
 					$.body.removeClass("landscape");
 					$.rootview.css({display: "none", height: (window.innerHeight - 100)});
@@ -1260,6 +1261,7 @@ $(function() {
 		UICurrentSplitViewDetail : null
 	});
 	$.UICheckForSplitView();
+	
 	if ($("detailview > subview").length > 0) {
 		$.UICurrentSplitViewDetail = "#";
 		$.UICurrentSplitViewDetail += $("detailview > subview").eq(0).attr("id");
@@ -1268,7 +1270,7 @@ $(function() {
 			if (rootview.css("position") === "absolute") {
 				rootview.css("display","none");
 				$.app.UIUnblock();
-			}
+			} 
 			var uiHref = $(this).attr("ui-href");
 			uiHref = "#" + uiHref;
 			if (uiHref === $.UICurrentSplitViewDetail) {
@@ -1526,13 +1528,13 @@ $(function() {
 	$.app.delegate("mask", "click", function() {
 		if ($.UIPopover.activePopover) {
 			$.UIPopover.hide($("#"+$.UIPopover.activePopover));
-			if ($("mask")) {
+			if ($("mask").length > 0) {
 				$("mask").UIUnblock();
 			}
 		}
-		if ($.rooview && $.rootview.css("position") === "absolute") {
+		if ($("rootview").css("position") === "absolute") {
 			$.rootview.style.display = "none";
-			$.rootview.UIUnblock();
+			$.app.UIUnblock();
 		}
 	});
 });
