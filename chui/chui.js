@@ -1309,7 +1309,7 @@ $.extend({
 	},
 	adjustPopoverHeight : function( popover ) {
 		var availableVerticalSpace = $.determineMaxPopoverHeight();
-		$(popover + " > section").css({"max-height": (availableVerticalSpace - 100), overflow: "hidden"});
+		$(popover + " > section").css({"max-height": (availableVerticalSpace - 100)});
 		var popoverID = popover.split("#");
 		popoverID = popoverID[1];
 	},
@@ -1407,7 +1407,7 @@ $.extend({
 		}
 		var trigEl = $(triggerElement);
 		var pos = this.determinePopoverPosition(triggerElement, popoverOrientation, pointerOrientation);
-		pos = " style='" + pos + "'";
+		pos = " style='" + pos + "; overflow:visible;'";
 		var popoverShell = 
 			'<popover ' + popoverID + ' ui-pointer-position="' + popoverOrientation + '-' + pointerOrientation + '"' 
 			+ pos + ' data-popover-trigger="#' + trigEl.attr("id") + '" data-popover-orientation="' + popoverOrientation + '" data-popover-pointer-orientation="' + pointerOrientation + '">\n' + 
@@ -1418,10 +1418,12 @@ $.extend({
 			+'</popover>';
 		var newPopover = $(popoverShell);
 		$.app.append(newPopover);
+		
 		// Adjust the left or bottom position of the popover if it is beyond the viewport:
 		if (!!opts.id) {
 			$.adjustPopoverHeight("#" + opts.id);
 			$("#" + opts.id).adjustPopoverPosition();
+			$("#" + opts.id).css("overflow","visible");
 		}
 	},
 	UICancelPopover : function (popover) {
@@ -1429,16 +1431,16 @@ $.extend({
 	},
 	UIHidePopover : function (popover) {
 		$.UIPopover.activePopover = null;
-		$(popover).css("opacity: 0; -webkit-transform: scale(0);");
+		$(popover).css({"opacity": 0, "-webkit-transform": "scale(0)"});
 		popover.UIUnblock();
 	},
 	UIEnablePopoverScrollpanels : function ( options ) {
 		try {
 			var count = 0;
-			$$("popover scrollpanel").forEach(function(item) {
+			$("popover scrollpanel").each(function(idx, item) {
 				item.setAttribute("ui-scroller", $.UIUuid());
 				var whichScroller = item.getAttribute("ui-scroller");
-				$.UIScrollers[whichScroller] = new iScroll(item.parentNode, options);
+				$.UIScrollers[whichScroller] = new iScroll(item.parentNode);
 			});
 		} catch(e) { }
 	}
@@ -1459,14 +1461,15 @@ $.extend($.UIPopover, {
 		if ($.UIPopover.activePopover === null) {
 			$.app.UIBlock(".01");
 			popover.repositionPopover();
-			popover.css({"opacity": 1, "-webkit-transform": "scale(1)"});
+			popover.css({"opacity": 1, "overflow": "visible", "-webkit-transform": "scale(1)"});
 			$.UIPopover.activePopover = popover.attr("id");
 	
 			popover.UIScroll();
 		} else {
 			return;
 		}
-		$.UIEnablePopoverScrollpanels({ desktopCompatibility: true });
+		$.UIEnablePopoverScrollpanels();
+		$("popover").css({"overflow":"visible"});
 	},
 	hide : function ( popover ) {
 		if ($.UIPopover.activePopover) {
@@ -1526,11 +1529,15 @@ $(window).bind("resize", function() {
 
 $(function() {
 	$.app.delegate("mask", "click", function() {
+		console.log("you clicked");
 		if ($.UIPopover.activePopover) {
-			$.UIPopover.hide($("#"+$.UIPopover.activePopover));
+			var whichPopover = "#";
+			whichPopover += $.UIPopover.activePopover;
+			$.UIPopover.hide($(whichPopover));
 			if ($("mask").length > 0) {
 				$("mask").UIUnblock();
 			}
+		console.log("$.UIPopover.activePopover: ", whichPopover);
 		}
 		if ($("rootview").css("position") === "absolute") {
 			$.rootview.style.display = "none";

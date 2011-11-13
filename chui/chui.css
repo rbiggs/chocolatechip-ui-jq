@@ -3704,6 +3704,7 @@ popover > section {
     min-height: 50px;
     position: relative;
     z-index: 1000;
+    overflow: hidden;
 }
 popover  > header {
     -webkit-box-sizing: border-box;
@@ -3743,9 +3744,6 @@ popover  > section .actionSheet {
     -webkit-border-radius: 5px;
     padding: 1px;
     
-}
-popover > section .sgwt-button.action {
-    margin: 10px 4px !important;
 }
 popover header {
     display: -webkit-box;
@@ -3925,4 +3923,5 @@ mask {
 	height: 100%;
 	width: 100%;
 	z-index: 9999;
+	cursor: pointer;
 }
