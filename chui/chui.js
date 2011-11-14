@@ -270,7 +270,7 @@ $.extend({
 		toolbarEl.prepend(deleteButtonTemp);
 		toolbarEl.append(editButtonTemp);
 		var deleteDisclosure = '<deletedisclosure><span>&#x2713</span></deletedisclosure>';
-		$(options.selector + " > tablecell").each(function() {
+		$(options.selector + " tablecell").each(function() {
 			$(this).prepend(deleteDisclosure);
 		});
 
