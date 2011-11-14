@@ -262,6 +262,9 @@ $.extend({
 		this.deletionList = [];
 		var listEl = $(options.selector);
 		var toolbarEl = $(options.toolbar);
+		if ((toolbarEl.children().eq(0)[0].nodeName) === "UIBUTTON") {
+			toolbarEl.children().eq(0).attr("ui-contains","uibutton");
+		}
 		var deleteButtonTemp = '<uibutton ui-bar-align="left" ui-implements="delete" class="disabled" style="display: none;"><label>' + label3 + '</label></uibutton>';
 		var editButtonTemp = '<uibutton ui-bar-align="right"  ui-implements="edit" ui-button-labels="' + label1 + ',' + label2 +  '"><label>' + label1 + '</label></uibutton>';
 		toolbarEl.prepend(deleteButtonTemp);
@@ -281,6 +284,7 @@ $.extend({
 				   $(this).UIToggleButtonLabel(label1, label2);
 				   $(this).attr("ui-implements", "done");
 				   listEl.addClass("ui-show-delete-disclosures");
+				   $(options.toolbar + " uibutton[ui-contains]").hide();
 				   $(this).siblings("uibutton[ui-implements='delete']").css("display","-webkit-inline-box");
 				   $("tablecell > img", listEl).each(function() {
 						$(this).css("-webkit-transform","translate3d(40px, 0, 0)");
@@ -288,6 +292,7 @@ $.extend({
 			   } else {
 				   $(this).UIToggleButtonLabel(label1, label2);
 				   $(this).removeAttr("ui-implements");
+				   $(options.toolbar + " uibutton[ui-contains]").show();
 				   $(this).siblings("uibutton[ui-implements='delete']").css("display","none");
 				   listEl.removeClass("ui-show-delete-disclosures");
 				   $("deletedisclosure").each(function() {

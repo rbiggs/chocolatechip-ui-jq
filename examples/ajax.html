@@ -83,6 +83,8 @@
 				// Re-initialize the scrollpanels for new data:
 				$("#view1 scrollpanel").data("ui-scroller").destroy();
 				$("#view1 scrollpanel").data("ui-scroller", new iScroll('#view1 scrollpanel'));
+				// Enable deletion of this tableview's cells:
+				$.UIDeleteTableCell({selector: "#view1 >subview > scrollpanel > tableview", toolbar: "#view1 > navbar"});
 	        });	
 			$.getJSON("recipes.json", function(data) {
 				$('#view2 tableview').empty();
