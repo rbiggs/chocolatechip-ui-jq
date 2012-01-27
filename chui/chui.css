@@ -496,6 +496,9 @@ uibutton {
     -webkit-box-orient: horizontal;
     
 }
+uibutton.disabled, uibutton.disabled > label {
+	cursor: default !important;
+}
 navbar > uibutton, 
 toolbar > uibutton {
 	-webkit-box-flex: 0 !important;
@@ -1338,8 +1341,8 @@ uibutton[ui-kind=action].gold.touched {
 
 /* Action Important UIButton */
 uibutton[ui-kind=action][ui-implements=done],
-uibutton[ui-kind=action][ui-implements=done].disabled:hover > span, 
-uibutton[ui-kind=action][ui-implements=done].disabled.touched > span  {
+uibutton[ui-kind=action][ui-implements=done].disabled:hover, 
+uibutton[ui-kind=action][ui-implements=done].disabled.touched  {
     background-image: 
         -webkit-gradient(linear, left top, left bottom,     
             from(rgba(123,159,235,0.7)), 
@@ -1559,6 +1562,9 @@ segmentedcontrol[ui-bar-align=left] {
 	-webkit-box-align: center;
 	-webkit-box-orient: horizontal;
 	-webkit-box-sizing: border-box;
+}
+toolbar > uibutton[ui-bar-align=left] {
+	margin-left: 10px;
 }
 *[ui-bar-align=right],
 stack[ui-bar-align=right],
@@ -1872,6 +1878,9 @@ tablecell[ui-implements=add] > cellsubtitle {
 tableview[ui-tablecell-order=centered] > tablecell {
 	position: relative;
 }
+tableview[ui-tablecell-order=centered] > tablecell > celltitle {
+	margin-top: 4px;
+}
 tableview[ui-tablecell-order=centered] > tablecell > celltitle,
 tableview[ui-tablecell-order=centered][ui-kind=grouped] > tablecell > celltitle,
 tableview[ui-kind=grouped][ui-tablecell-order=centered] > tablecell > celltitle  {
@@ -2071,7 +2080,7 @@ tableview > tablecell > button > .content > img {
 	display: none;
 }
 
-celldatetime {
+celldatetime, cellvalue {
 	color: #2671d8;
 	float: right;
 	margin-right: 34px;
@@ -2182,7 +2191,8 @@ tableview[ui-tablecell-order=stacked].ui-show-move-indicator > tablecell:hover >
     color: #4c5f70 !important;
 }
 tableview[ui-tablecell-order=stacked].ui-show-delete-disclosures > tablecell:hover > celldatetime, 
-tableview[ui-tablecell-order=stacked].ui-show-move-indicator > tablecell:hover > .celldatetime {
+tableview[ui-tablecell-order=stacked].ui-show-move-indicator > tablecell:hover > .celldatetime, tableview[ui-tablecell-order=stacked].ui-show-delete-disclosures > tablecell:hover > cellvalue, 
+tableview[ui-tablecell-order=stacked].ui-show-move-indicator > tablecell:hover > .cellvalue  {
 	color: #2671d8 !important;
 }
 tableview[ui-tablecell-order=stacked].ui-show-delete-disclosures > tablecell > cellsubtitle, 
@@ -2263,7 +2273,9 @@ tableview[ui-tablecell-order=stacked].ui-show-move-indicator > tablecell > cells
 	width: 85%;
 	-webkit-transform: translate3d(0px,0,0);
 }
-tableview[ui-tablecell-order=stacked].ui-show-move-indicator > tablecell > celldatetime {
+tableview[ui-tablecell-order=stacked].ui-show-move-indicator > tablecell > celldatetime,
+tableview[ui-tablecell-order=stacked].ui-show-move-indicator > tablecell > cellvalue 
+{
 	-webkit-transition: transform .25s ease-in-out;
 	-webkit-transform: translate3d(-10px,0,0);
 }

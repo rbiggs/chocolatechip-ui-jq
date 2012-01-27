@@ -72,6 +72,23 @@ $.extend({
 		});
 	},
 	
+	UINavigateToNextView : function(viewID) {
+		$($.UINavigationHistory[$.UINavigationHistory.length-1])
+			.attr("ui-navigation-status","traversed");
+		$(viewID).attr("ui-navigation-status","current");
+		$.UINavigationHistory.push(viewID);
+	},
+	
+	resetApp : function ( hard ) {
+		if (hard === "hard") {
+			window.location.reload(true);
+		} else {
+			$.views.attr("ui-navigation-status", "upcoming");
+			$.main.attr("ui-navigation-status", "current");
+			$.UINavigationHistory = ["#main"];
+		}
+	},
+	
 	UINavigationEvent : false,
 	
     UINavigationList : function() {
@@ -262,16 +279,16 @@ $.extend({
 		this.deletionList = [];
 		var listEl = $(options.selector);
 		var toolbarEl = $(options.toolbar);
-		if ((toolbarEl.children().eq(0)[0].nodeName) === "UIBUTTON") {
+		if ((toolbarEl.children().length && toolbarEl.children().eq(0)[0].nodeName) === "UIBUTTON") {
 			toolbarEl.children().eq(0).attr("ui-contains","uibutton");
 		}
-		var deleteButtonTemp = '<uibutton ui-bar-align="left" ui-implements="delete" class="disabled" style="display: none;"><label>' + label3 + '</label></uibutton>';
-		var editButtonTemp = '<uibutton ui-bar-align="right"  ui-implements="edit" ui-button-labels="' + label1 + ',' + label2 +  '"><label>' + label1 + '</label></uibutton>';
+		var deleteButtonTemp = '<uibutton ui-kind="deletionListDeleteButton" ui-bar-align="left" ui-implements="delete" class="disabled" style="display: none;"><label>' + label3 + '</label></uibutton>';
+		var editButtonTemp = '<uibutton ui-kind="deletionListEditButton" ui-bar-align="right"  ui-implements="edit" ui-button-labels="' + label1 + ',' + label2 +  '"><label>' + label1 + '</label></uibutton>';
 		toolbarEl.prepend(deleteButtonTemp);
 		toolbarEl.append(editButtonTemp);
 		var deleteDisclosure = '<deletedisclosure><span>&#x2713</span></deletedisclosure>';
-		$(options.selector + " tablecell").each(function() {
-			$(this).prepend(deleteDisclosure);
+		selector.find("tablecell").each(function(idx, item) {
+			$(item).prepend(deleteDisclosure);
 		});
 
 		listEl.attr("data-deletable-items", 0);
@@ -343,6 +360,22 @@ $.extend({
 		UIEditExecution();
 		UIDeleteDisclosureSelection();
 		UIDeletionExecution(); 
+	},
+	
+	UIResetDeletionList : function(node, toolbar) {
+		node = $(node);
+		toolbar = $(toolbar);
+		if (toolbar.find("uibutton[ui-kind=deletionListDeleteButton]").css("display") === "-webkit-box") {
+			console.log("Resetting deletion list!"); 
+			node.attr("data-deletable-items", 0);
+			//node.removeClass("ui-show-delete-disclosures");
+			node.children().removeClass("checked");
+			var resetLabel = toolbar.find("uibutton[ui-kind=deletionListEditButton]").attr("ui-button-labels");
+			resetLabel = resetLabel.split(",");
+			resetLabel = resetLabel[0];
+			toolbar.find("uibutton[ui-kind=deletionListEditButton] > label").text(resetLabel);
+			toolbar.find("uibutton[ui-kind=deletionListEditButton]").attr("ui-implements", "done");
+		}
 	}
 });
 $.extend({
@@ -458,7 +491,15 @@ $.extend({
 				$(this).addClass("disabled");
 			}
 		}
-	}	
+	},
+	resetSpinner : function(selector) {
+		var value = $(selector).data("range-value")
+		value = value[0]
+		$(selector).find("label").text(value);
+		$(selector).find("uibutton").eq(0).addClass("disabled");
+		$(selector).find("uibutton").eq(1).removeClass("disabled");
+		
+	}
 });
 $.extend({
 	UIPopUpIsActive : null,
@@ -1534,7 +1575,6 @@ $(window).bind("resize", function() {
 
 $(function() {
 	$.app.delegate("mask", "click", function() {
-		console.log("you clicked");
 		if ($.UIPopover.activePopover) {
 			var whichPopover = "#";
 			whichPopover += $.UIPopover.activePopover;
@@ -1542,7 +1582,6 @@ $(function() {
 			if ($("mask").length > 0) {
 				$("mask").UIUnblock();
 			}
-		console.log("$.UIPopover.activePopover: ", whichPopover);
 		}
 		if ($("rootview").css("position") === "absolute") {
 			$.rootview.style.display = "none";
@@ -1674,5 +1713,15 @@ $.extend({
 		});
 		return result;
 	}		
+});
+$.extend({
+	centsToDollars : function( amount ) {
+		amount = amount.substr(0, amount.length-3) + amount.substr(amount.length-2,2);
+		return parseInt(amount, 10);
+	},
+	dollarsToCents : function( amount ) {
+		amount = String(parseInt(amount, 10));
+		return amount.substr(0, amount.length-2) + "." + amount.substr(amount.length-2,2);
+	}
 });
 })(jQuery);
