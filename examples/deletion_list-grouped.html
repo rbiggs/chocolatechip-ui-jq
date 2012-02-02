@@ -26,6 +26,10 @@
 					firstTime = false;
 				};
 				$.UIDeleteTableCell({selector: "tableview", toolbar: "#toolbar_01", callback: deleteItem});
+				
+				$("#resetDeleteState").bind("click", function() {
+					$.UIResetDeletionList("tableview", "navbar");
+				});
 			});
 	</script>
 </head>
@@ -55,6 +59,7 @@
 						</tablecell>
 					</tableview>
 					<p id="selection_list_response" ui-kind="grouped">You just deleted: <span></span></p>
+					<uibutton id="resetDeleteState" ui-kind="action">Reset Delete List</uibutton>
 				</scrollpanel>
 			</subview>
 		</view>

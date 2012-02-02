@@ -1,8 +1,8 @@
 /*
-	pO\		
+    pO\		
    6  /\
-	 /OO\
-	/OOOO\
+     /OO\
+    /OOOO\
   /OOOOOOOO\
  ((OOOOOOOO))
   \:~=++=~:/   
@@ -77,6 +77,9 @@ $.extend({
 			.attr("ui-navigation-status","traversed");
 		$(viewID).attr("ui-navigation-status","current");
 		$.UINavigationHistory.push(viewID);
+		if ($.app.attr("ui-kind") === "navigation-with-one-navbar") {
+			$("navbar uibutton[ui-implements=back]").css("display","block");
+		}
 	},
 	
 	resetApp : function ( hard ) {
@@ -365,16 +368,16 @@ $.extend({
 	UIResetDeletionList : function(node, toolbar) {
 		node = $(node);
 		toolbar = $(toolbar);
-		if (toolbar.find("uibutton[ui-kind=deletionListDeleteButton]").css("display") === "-webkit-box") {
-			console.log("Resetting deletion list!"); 
+		if (node.hasClass("ui-show-delete-disclosures")) {
 			node.attr("data-deletable-items", 0);
-			//node.removeClass("ui-show-delete-disclosures");
-			node.children().removeClass("checked");
+			node.find("deletedisclosure").removeClass("checked");
+			node.removeClass("ui-show-delete-disclosures");
 			var resetLabel = toolbar.find("uibutton[ui-kind=deletionListEditButton]").attr("ui-button-labels");
 			resetLabel = resetLabel.split(",");
 			resetLabel = resetLabel[0];
 			toolbar.find("uibutton[ui-kind=deletionListEditButton] > label").text(resetLabel);
-			toolbar.find("uibutton[ui-kind=deletionListEditButton]").attr("ui-implements", "done");
+			toolbar.find("uibutton[ui-kind=deletionListEditButton]").attr("ui-implements", "edit");
+			toolbar.find("uibutton[ui-kind=deletionListDeleteButton]").css("display", "none");
 		}
 	}
 });
