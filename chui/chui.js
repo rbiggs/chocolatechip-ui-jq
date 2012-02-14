@@ -378,7 +378,9 @@ $.extend({
 			toolbar.find("uibutton[ui-kind=deletionListEditButton] > label").text(resetLabel);
 			toolbar.find("uibutton[ui-kind=deletionListEditButton]").attr("ui-implements", "edit");
 			toolbar.find("uibutton[ui-kind=deletionListDeleteButton]").css("display", "none");
+			toolbar.find("uibutton[ui-kind=deletionListDeleteButton]").toggleClass('disabled');
 		}
+		node.find('tablecell').removeClass('deletable');
 	}
 });
 $.extend({
