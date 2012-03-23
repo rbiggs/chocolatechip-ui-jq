@@ -57,16 +57,17 @@
         	$("#popbutton").UIPopSubview();
         	$("#spinbutton").UISpinSubview();
         	
-        	$("view:nth-of-type(2) > navbar > uibutton[ui-bar-align=right]").bind("click", function() {
+        	$("#flip > navbar > uibutton[ui-bar-align=right]").bind("click", function() {
+        		console.log(this.nodeName);
         		$(this).UIToggleButtonLabel("Flip Over", "Flip Back");
         	});
-        	$("view:nth-of-type(3) > navbar > uibutton[ui-bar-align=right]").bind("click", function() {
+        	$("#pop > navbar > uibutton[ui-bar-align=right]").bind("click", function() {
         		$(this).UIToggleButtonLabel("Fade In", "Fade Out");
         	});
-        	$("view:nth-of-type(4) > navbar > uibutton[ui-bar-align=right]").bind("click", function() {
+        	$("#spin > navbar > uibutton[ui-bar-align=right]").bind("click", function() {
         		$(this).UIToggleButtonLabel("Pop In", "Close");
         	});
-        	$("view:nth-of-type(5) > navbar > uibutton[ui-bar-align=right]").bind("click", function() {
+        	$("#spin > navbar > uibutton[ui-bar-align=right]").bind("click", function() {
         		$(this).UIToggleButtonLabel("Spin In", "Spin Out");
         	});
 		});
@@ -285,7 +286,7 @@
 				</scrollpanel>
 			</subview>
 		</view>
-		<view id="spin" ui-background-style="speckled" ui-tablecell-order="stacked" ui-navigation-status="upcoming">
+		<view id="spin" ui-tablecell-order="stacked" ui-navigation-status="upcoming">
 			<navbar>
 				<uibutton ui-bar-align="left" ui-implements="back">
 					<label>Back</label>
