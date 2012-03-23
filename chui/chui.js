@@ -957,7 +957,7 @@ $.fn.UIActionSheet = function(opts) {
 		if (actionSheetColor) {
 			actionSheetStr += " ui-action-sheet-color='" + actionSheetColor + "'";
 		}
-		actionSheetStr += "><scrollpanel>";
+		actionSheetStr += "><scrollpanel><panel>";
 		actionSheetStr += title;
 		var uiButtons = "", uiButtonObj, uiButtonImplements, uiButtonTitle, uiButtonCallback;
 		if (!!opts.uiButtons) {
@@ -973,7 +973,7 @@ $.fn.UIActionSheet = function(opts) {
 				uiButtons +=	"</label></uibutton>"	;			
 			}
 		}
-		actionSheetStr += uiButtons + "<uibutton ui-kind='action' ui-implements='cancel' class='stretch' onclick='$.UIHideActionSheet(\"#" + actionSheetID + "\")'><label>Cancel</label></uibutton></scrollpanel></actionsheet>";
+		actionSheetStr += uiButtons + "<uibutton ui-kind='action' ui-implements='cancel' class='stretch' onclick='$.UIHideActionSheet(\"#" + actionSheetID + "\")'><label>Cancel</label></uibutton></panel></scrollpanel></actionsheet>";
 		var actionSheet = $(actionSheetStr);
 		that.append(actionSheet);
 	};
@@ -982,9 +982,8 @@ $.fn.UIActionSheet = function(opts) {
 	$(actionSheetUIButtons).bind("click", function() {
 		$.UIHideActionSheet();
 	});
-	
-	var scroller = new iScroll($("#" + actionSheetID)[0]);
-	$("#" + actionSheetID).data("ui-scroller", scroller);
+	var scroller = new iScroll($("#" + actionSheetID).find('scrollpanel')[0]);
+	$("#" + actionSheetID).find('scrollpanel').data("ui-scroller", scroller);
 };
 $.extend($, {
 	UIShowActionSheet : function(actionSheetID) {
@@ -997,6 +996,7 @@ $.extend($, {
 		screenCover.bind("touchmove", function(e) {
 			e.preventDefault();
 		});
+		$('#'+actionSheetID).find("scrollpanel").data("ui-scroller").refresh();
 	},
 	UIHideActionSheet : function() {
 		var actionSheet = $.app.data("ui-action-sheet-id");
