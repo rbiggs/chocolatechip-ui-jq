@@ -10,7 +10,7 @@
 ChocolateChip-UI for jQuery
 Copyright 2011 Robert Biggs: www.chocolatechip-ui.com
 License: BSD
-Version: 1.0
+Version: 1.0.1
 */
 (function($) {
 
@@ -22,6 +22,11 @@ $(function() {
 	$.tablet = window.innerWidth > 600;
 	$(window).bind("resize", function() {
 		$.tablet = window.innerWidth > 600;
+	});
+	$.app.delegate("uibutton", $.userAction, function() {
+		if ($(this).attr("ui-implements") === "back") {
+		  $.UINavigateBack();
+		}
 	});
 });
 $.extend({
@@ -37,7 +42,16 @@ $.extend({
 		standalone : navigator.standalone,
 		capitalize : function ( str ) {
 			return str.charAt(0).toUpperCase() + str.substring(1).toLowerCase();
-		},
+		}
+});
+$(function() {
+	if (!$.touchEnabled) {
+		var stylesheet = $('head').find('link[rel=stylesheet]').attr('href');
+		var stylesheet1 = stylesheet.replace(/chui\.css/, 'chui.desktop.css');
+		$('head').append('<link rel="stylesheet" href="' + stylesheet1 + '">');
+	}
+});
+$.extend({
 	UIUuidSeed : function ( seed ) {
 		if (seed) {
 			return (((1 + Math.random()) * 0x10000) | 0).toString(seed).substring(1);
@@ -73,6 +87,7 @@ $.extend({
 	},
 	
 	UINavigateToNextView : function(viewID) {
+		$.UINavigationListExits = true;
 		$($.UINavigationHistory[$.UINavigationHistory.length-1])
 			.attr("ui-navigation-status","traversed");
 		$(viewID).attr("ui-navigation-status","current");
@@ -92,10 +107,15 @@ $.extend({
 		}
 	},
 	
+	UINavigationListExits : false,
+	
 	UINavigationEvent : false,
+	
+	UINavigationEnabled : false,
 	
     UINavigationList : function() {
 		var navigateList = function(item) {
+			try {
 			if ($.app.attr("ui-kind")==="navigation-with-one-navbar") {
 				$.app.find("navbar > uibutton[ui-implements=back]").css("display", "block");
 			}
@@ -106,12 +126,14 @@ $.extend({
 				$.main.attr("ui-navigation-status", "traversed");
 			}
 			$.UINavigationHistory.push(item.attr("href"));
+			} catch(err) {}
 		};
-        $.app.delegate("tablecell", "click", "touchStart", function() {
+        $.app.delegate("tablecell", "click", function() {
             if ($(this).attr("href")) {
 	            if ($.UINavigationEvent) {
 	                return;
 	            } else {
+	            	$(this).UIHandleTouchState();
 					$.UINavigationEvent = false;
 	                navigateList($(this));
 					$.UINavigationEvent = true;
@@ -120,6 +142,17 @@ $.extend({
         });
 	}
 });
+$.fn.UIHandleTouchState = function(delay) {
+	if ($.UIScrollingActive) return;
+	delay = delay || 200;
+	var $this = $(this);
+	if ($.touchEnabled) {
+		$this.addClass('touched');
+		setTimeout(function() {
+			$this.removeClass('touched');
+		}, delay);
+	}
+};
 $(function() {
     $.UIBackNavigation();
     $.UINavigationList();
@@ -155,6 +188,26 @@ $.fn.UIToggleButtonLabel = function ( label1, label2 ) {
 	}
 	return this;
 };
+$(function() {
+	$.app.delegate('uibutton', 'touchstart', function() {
+		if ($(this).hasClass('disabled')) {
+			return false;
+		} else {
+			if (!$.UIScrollingActive) {
+				$(this).UIHandleTouchState();
+			}
+		}
+	});
+});
+$.fn.toggleClassName = function( firstClassName, secondClassName ) {
+	if (!$(this).hasClass(firstClassName)) {
+	   $(this).addClass(firstClassName);
+	   $(this).removeClass(secondClassName);
+	} else {
+		$(this).removeClass(firstClassName);
+		$(this).addClass(secondClassName);
+	}
+};
 $.fn.UIIdentifyChildNodes = function ( ) {
 	var kids = $(this)[0].childElementCount;
 	for (var i = 0; i < kids; i++) {
@@ -183,7 +236,7 @@ $.UIPaging = function( selector, opts ) {
 };
 
 $(function() {
-	if (document.querySelector("stack[ui-implements=paging]")) {
+	if ($("stack[ui-implements=paging]").length > 0) {
 		$.UIPaging("stack[ui-implements=paging] > panel", {
 			snap: true,
 			momentum: false,
@@ -257,6 +310,7 @@ $.extend({
 		/* options = {
 			selector: selector,
 			editButton: [label1, label2],
+			deleteButton: label3,
 			toolbar: toolbar,
 			callback: callback
 		} */
@@ -290,8 +344,8 @@ $.extend({
 		toolbarEl.prepend(deleteButtonTemp);
 		toolbarEl.append(editButtonTemp);
 		var deleteDisclosure = '<deletedisclosure><span>&#x2713</span></deletedisclosure>';
-		selector.find("tablecell").each(function(idx, item) {
-			$(item).prepend(deleteDisclosure);
+		selector.find("tablecell").each(function() {
+			$($(this)).prepend(deleteDisclosure);
 		});
 
 		listEl.attr("data-deletable-items", 0);
@@ -607,7 +661,7 @@ $.fn.UIBlock = function ( opacity ) {
 	return this;
 };
 $.fn.UIUnblock = function ( ) {
-	if ($("mask")) {
+	if ($("mask").length > 0) {
 		$("mask").remove();
 	}
 	return this;
@@ -620,8 +674,10 @@ $.fn.UISelectionList = function ( callback ) {
 		if (this.nodeName.toLowerCase() === "tablecell") {
 			this.insertAdjacentHTML("afterBegin", "<checkmark>&#x2713</checkmark>");
 			$(this).bind("click", function() {
+				$(this).siblings().removeClass("selected").removeClass('touched');
 				$(this).siblings().removeClass("selected");
 				$(this).addClass("selected");
+					$(this).UIHandleTouchState();
 				$(this).find("input")[0].checked = true; 
 				if (callback) {
 					callback.call(callback, $(this).find("input"));
@@ -657,6 +713,7 @@ $.fn.UIInitSwitchToggling = function() {
 			$(this).find("input[type='checkbox']").prop("checked","false");
 		}
 		$(this).bind("click", function(e) {
+			$(this).UIHandleTouchState(400);
 			$(this).parent().css("backgroundImage","none");
 			e.preventDefault();
 			$(this).UISwitchControl();
@@ -711,6 +768,7 @@ $.fn.UICreateSwitchControl = function( opts ) {
 	$(newSwitchID).find("input").prop("checked", (status === "on" ? true : false));
 	$(newSwitchID).bind("click", function() {
 		$(this).UISwitchControl(callback);
+		$(this).UIHandleTouchState(400);
 	});
 };
 $.fn.UISegmentedControl = function( container, callback ) {
@@ -947,8 +1005,12 @@ $.fn.UITabBarForViews = function ( ) {
 $.fn.UIActionSheet = function(opts) {
 	var that = $(this);
 	var actionSheetID = opts.id;
-	var actionSheetColor =  opts.color;
-	var title = "";
+			var actionSheetColor = 'undefined';
+			var actionSheetUuid = $.UIUuid();
+			if (!!opts.color) {
+				actionSheetColor = opts.color;
+			}
+			var title = '';
 	if (opts.title) {
 		title = "<p>" + opts.title + "</p>";
 	}
@@ -957,7 +1019,7 @@ $.fn.UIActionSheet = function(opts) {
 		if (actionSheetColor) {
 			actionSheetStr += " ui-action-sheet-color='" + actionSheetColor + "'";
 		}
-		actionSheetStr += "><scrollpanel><panel>";
+				actionSheetStr += "><scrollpanel><panel>";
 		actionSheetStr += title;
 		var uiButtons = "", uiButtonObj, uiButtonImplements, uiButtonTitle, uiButtonCallback;
 		if (!!opts.uiButtons) {
@@ -976,14 +1038,16 @@ $.fn.UIActionSheet = function(opts) {
 		actionSheetStr += uiButtons + "<uibutton ui-kind='action' ui-implements='cancel' class='stretch' onclick='$.UIHideActionSheet(\"#" + actionSheetID + "\")'><label>Cancel</label></uibutton></panel></scrollpanel></actionsheet>";
 		var actionSheet = $(actionSheetStr);
 		that.append(actionSheet);
+		var scrollpanel = actionSheet.find('scrollpanel');
+		var scroller = new iScroll(scrollpanel[0]);
+		$(scrollpanel).data("ui-scroller", scroller);
+		
 	};
 	createActionSheet();
 	var actionSheetUIButtons = "#" + actionSheetID + " uibutton";
 	$(actionSheetUIButtons).bind("click", function() {
 		$.UIHideActionSheet();
 	});
-	var scroller = new iScroll($("#" + actionSheetID).find('scrollpanel')[0]);
-	$("#" + actionSheetID).find('scrollpanel').data("ui-scroller", scroller);
 };
 $.extend($, {
 	UIShowActionSheet : function(actionSheetID) {
@@ -996,7 +1060,7 @@ $.extend($, {
 		screenCover.bind("touchmove", function(e) {
 			e.preventDefault();
 		});
-		$('#'+actionSheetID).find("scrollpanel").data("ui-scroller").refresh();
+		$(actionSheetID).find("scrollpanel").data("ui-scroller").refresh();
 	},
 	UIHideActionSheet : function() {
 		var actionSheet = $.app.data("ui-action-sheet-id");
@@ -1490,7 +1554,7 @@ $.extend({
 			var count = 0;
 			$("popover scrollpanel").each(function(idx, item) {
 				item.setAttribute("ui-scroller", $.UIUuid());
-				var whichScroller = item.getAttribute("ui-scroller");
+				var whichScroller = item.attr("ui-scroller");
 				$.UIScrollers[whichScroller] = new iScroll(item.parentNode);
 			});
 		} catch(e) { }

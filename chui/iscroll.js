@@ -2,11 +2,13 @@
  * iScroll v4.1.9 ~ Copyright (c) 2011 Matteo Spinelli, http://cubiq.org
  * Released under MIT license, http://cubiq.org/license
  */
+$.UIScrollingActive = false;
 (function(){
 var m = Math,
 	mround = function (r) { return r >> 0; },
 	vendor = (/webkit/i).test(navigator.appVersion) ? 'webkit' :
 		(/firefox/i).test(navigator.userAgent) ? 'Moz' :
+			(/trident/i).test(navigator.userAgent) ? 'ms' :
 		'opera' in window ? 'O' : '',
 
     // Browser capabilities
@@ -30,6 +32,7 @@ var m = Math,
 	})(),
 	cancelFrame = (function () {
 	    return window.cancelRequestAnimationFrame
+				|| window.webkitCancelAnimationFrame
 			|| window.webkitCancelRequestAnimationFrame
 			|| window.mozCancelRequestAnimationFrame
 			|| window.oCancelRequestAnimationFrame
@@ -73,7 +76,6 @@ var m = Math,
 			useTransition: false,
 			topOffset: 0,
 			checkDOMChanges: false,		// Experimental
-			mouseGestures: true,
 
 			// Scrollbar
 			hScrollbar: true,
@@ -89,7 +91,6 @@ var m = Math,
 			zoomMax: 4,
 			doubleTapZoom: 2,
 			wheelAction: 'scroll',
-			disableMouseWheel : false,
 
 			// Snap
 			snap: false,
@@ -109,13 +110,7 @@ var m = Math,
 			onZoom: null,
 			onZoomEnd: null
 		};
-		// Helpers FIX ANDROID BUG!
-		// translate3d and scale doesn't work together! 
-		// Ignoring 3d ONLY WHEN YOU SET that.zoom
-		if ( that.zoom && isAndroid ){
-			trnOpen = 'translate(';
-			trnClose = ')';
-		}
+	
 		// User defined options
 		for (i in options) that.options[i] = options[i];
 		
@@ -130,6 +125,14 @@ var m = Math,
 		that.options.zoom = that.options.useTransform && that.options.zoom;
 		that.options.useTransition = hasTransitionEnd && that.options.useTransition;
 		
+			// Helpers FIX ANDROID BUG!
+			// translate3d and scale doesn't work together! 
+			// Ignoring 3d ONLY WHEN YOU SET that.options.zoom
+			if ( that.options.zoom && isAndroid ){
+				trnOpen = 'translate(';
+				trnClose = ')';
+			}
+			
 		// Set some default styles
 		that.scroller.style[vendor + 'TransitionProperty'] = that.options.useTransform ? '-' + vendor.toLowerCase() + '-transform' : 'top left';
 		that.scroller.style[vendor + 'TransitionDuration'] = '0';
@@ -147,10 +150,9 @@ var m = Math,
 		that._bind(START_EV);
 		if (!hasTouch) {
 			that._bind('mouseout', that.wrapper);
-			if (!that.options.disableMouseWheel) {
+				if (that.options.wheelAction != 'none')
 				that._bind(WHEEL_EV);
 			}
-		}
 
 		if (that.options.checkDOMChanges) that.checkDOMTime = setInterval(function () {
 			that._checkDOMChanges();
@@ -177,20 +179,12 @@ iScroll.prototype = {
 				if (e.target.tagName === "TEXTAREA") return;
 				if (e.target.tagName === "INPUT") return;
 				if (e.target.tagName === "SELECT") return;
-				if (!hasTouch && !that.options.mouseGestures) return;
 				that._start(e);
 				break;
-			case MOVE_EV: that._move(e); 
-			  
-				if (!hasTouch && !that.options.mouseGestures) return;
-				break;
+				case MOVE_EV: that._move(e); break;
 			case END_EV:
-			case CANCEL_EV: that._end(e); 
-				if (!hasTouch && !that.options.mouseGestures) return;
-				break;
-			case RESIZE_EV: that._resize(); 
-				if (!hasTouch && !that.options.mouseGestures) return;
-				break;
+				case CANCEL_EV: that._end(e); break;
+				case RESIZE_EV: that._resize(); break;
 			case WHEEL_EV: that._wheel(e); break;
 			case 'mouseout': that._mouseout(e); break;
 			case 'webkitTransitionEnd': that._transitionEnd(e); break;
@@ -390,6 +384,7 @@ iScroll.prototype = {
 	},
 	
 	_move: function (e) {
+		$.UIScrollingActive = true;
 		var that = this,
 			point = hasTouch ? e.touches[0] : e,
 			deltaX = point.pageX - that.pointX,
@@ -436,12 +431,12 @@ iScroll.prototype = {
 			newY = that.options.bounce ? that.y + (deltaY / 2) : newY >= that.minScrollY || that.maxScrollY >= 0 ? that.minScrollY : that.maxScrollY;
 		}
 
-		if (that.absDistX < 6 && that.absDistY < 6) {
 			that.distX += deltaX;
 			that.distY += deltaY;
 			that.absDistX = m.abs(that.distX);
 			that.absDistY = m.abs(that.distY);
 
+			if (that.absDistX < 6 && that.absDistY < 6) {
 			return;
 		}
 
@@ -471,6 +466,7 @@ iScroll.prototype = {
 	},
 	
 	_end: function (e) {
+		$.UIScrollingActive = false;
 		if (hasTouch && e.touches.length != 0) return;
 
 		var that = this,
@@ -638,10 +634,12 @@ iScroll.prototype = {
 		if ('wheelDeltaX' in e) {
 			wheelDeltaX = e.wheelDeltaX / 12;
 			wheelDeltaY = e.wheelDeltaY / 12;
+			} else if('wheelDelta' in e) {
+				wheelDeltaX = wheelDeltaY = e.wheelDelta / 12;
 		} else if ('detail' in e) {
 			wheelDeltaX = wheelDeltaY = -e.detail * 3;
 		} else {
-			wheelDeltaX = wheelDeltaY = -e.wheelDelta;
+				return;
 		}
 		
 		if (that.options.wheelAction == 'zoom') {
@@ -879,7 +877,7 @@ iScroll.prototype = {
 		that._unbind(END_EV);
 		that._unbind(CANCEL_EV);
 		
-		if (that.options.hasTouch) {
+		if (!that.options.hasTouch) {
 			that._unbind('mouseout', that.wrapper);
 			that._unbind(WHEEL_EV);
 		}
@@ -1001,6 +999,8 @@ iScroll.prototype = {
 	scrollToPage: function (pageX, pageY, time) {
 		var that = this, x, y;
 
+			time = time === undefined ? 400 : time;
+	
 		if (that.options.onScrollStart) that.options.onScrollStart.call(that);
 
 		if (that.options.snap) {
@@ -1021,7 +1021,7 @@ iScroll.prototype = {
 			if (y < that.maxScrollY) y = that.maxScrollY;
 		}
 
-		that.scrollTo(x, y, time || 400);
+			that.scrollTo(x, y, time);
 	},
 
 	disable: function () {
