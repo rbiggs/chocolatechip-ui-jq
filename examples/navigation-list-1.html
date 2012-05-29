@@ -11,9 +11,7 @@
     <script src="../chui/iscroll.js"></script>
     <script>
         $(function() {
-        	$('uibutton[ui-implements="bozo"]').bind("click", function() {
-        		$(this).UIToggleButtonLabel("Bozo","Clown");
-        	});
+        
 		});
     </script>
     
@@ -22,9 +20,6 @@
 	<app ui-background-style="striped">
 		<view id="main" ui-background-style="striped" ui-navigation-status="current">
 			<navbar>
-				<uibutton ui-implements="bozo" ui-bar-align="left">
-					<label>Bozo</label>
-				</uibutton>
 				<h1>Tableview</h1>
 			</navbar>
 			<subview ui-associations="withNavBar">
