@@ -3,6 +3,10 @@ title: ChocolateChip-UI - A Compact JavaScript Framework for Mobile Webkit Apps
 ---
 #ChocolateChip-UI for jQuery
 
+##Notice: All work on this repository has been terminated!
+
+**There is now a new version of [ChocolateChip-UI 2.0](https://github.com/rbiggs/chocolatechip-ui) that works for ChocolateChip.js, jQuery and Zepto. As such, there is no longer any need for separate versions for jQuery and Zepto. The new version contains a magical abstraction layer to make this possible. This means that with only one version, everyone gets the same features, behaviors, widgets and bug fixes at the same time.**
+
 ChocolateChip-UI is a mobile Web app framework using HTML5, WAML, CSS and JavaScript. This version runs on top of jQuery. That means you can use normal jQuery to do things in your Web app. This includes the latest version of jQuery and jquery.tmpl.js to cover all you data acquisition and presentation needs. This version of ChocolateChip-UI has not been tested with the multitude of jQuery plugins and so we cannot verify or assure that any particular plugin will work as expected with this framework. If you have issues with a jQuery plugin together with this framework, your first recourse should be to contact the plugin author.
 
 ChocolateChip-UI uses specially defined markup for clarity and conciseness to construct your app. ChocolateChip-UI's CSS and JavaScript will imbue the app with styling and basic functionality. Using simple one-liners you can active handed coded markup into sophisticated controls. Or with simple initialization routines you can create controls dynamically.
