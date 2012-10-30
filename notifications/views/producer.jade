@@ -1,0 +1,24 @@
+p
+ a(href='/logout', class="button logout") Logout
+h1 Producer
+p
+ input(type='text', id='actionURI', placeholder='http://')
+ br
+ input(type='text', id='message', placeholder='Type message...')
+ br
+ button(name="submit", type="submit", id="submitButton") Send
+script
+  $(function() {
+    var socket = io.connect('beezle.local:8080');
+    console.dir(socket);
+    socket.on('connect', function () {
+    var notification = {};      
+      $('#submitButton').bind('click', function() {
+        var message = $('#message').val() || "Default message";
+        var actionUri = $('#actionURI').val() || "http://www.google.com";
+        notification.message = message;
+        notification.actionUri = actionUri;
+        socket.emit('notification', notification);
+      });
+    });
+  });

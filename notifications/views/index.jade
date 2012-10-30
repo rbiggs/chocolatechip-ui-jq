@@ -1,0 +1,13 @@
+// If the user is logged in, show the logout link:
+- if (user) 
+  p
+    a(href='/logout', class="button logout") Logout
+// Otherwise show the login link:
+- if (!user) 
+  p
+    a(href='/login', class="button") Login
+h1.noBottomBorder Messaging
+p A demonstration of push messaging using Node.js and socket.io.
+- if (user)
+  p
+    a(href='/producer', class='button') Go to Producer

@@ -1,0 +1,38 @@
+h1 Consumer
+a(id='notification', target='_blank', href='#')
+  span(class='message') My message
+button(id='showMessage') Show message
+
+script
+  $(function() {
+    var button = $('#showMessage');
+    var message = $('#notification');
+    
+    var socket = io.connect('beezle.local:8080/');
+    
+    var userLogin = {};
+    socket.on('connect', function (data) {
+      $('#submitButton').css('display','block');
+      $('#submitButton').on('click', function() {
+        userLogin.userName = $('#userName').val() || '';
+        socket.emit('userAdded', userLogin);
+      });
+    });
+
+    socket.on('notification', function (data) {
+      console.log(data.message);
+      message.html(data.message);
+      message.attr('href', data.actionUri);
+      message.addClass("animateNotification");
+      setTimeout(function() {
+        message.removeClass('animateNotification');
+      },5000);
+     
+    });
+    button.on('click', function() {
+      message.toggleClass('animateNotification');
+      setTimeout(function() {
+        message.removeClass('animateNotification');
+      },5000);
+    });
+  });

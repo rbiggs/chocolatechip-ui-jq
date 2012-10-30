@@ -1,0 +1,167 @@
+/* Global Functions */
+// Define collect of vendor prefixes.
+// Official will be used to output the property without a prefix.
+vendors = webkit moz o ms official
+// Define a function to add vendor prefixes to a property and then pass the arguments.
+vendor(prop, args)
+  for vendor in vendors
+      if vendor == official
+        {prop} args
+      else
+        -{vendor}-{prop}: args
+fs()
+  font-size arguments
+shad()
+  vendor 'box-shadow' arguments
+bi()
+  background-image arguments
+// Define gradient function:
+grad()
+  bi -moz-linear-gradient(arguments);
+  bi -webkit-linear-gradient(arguments);
+  bi -o-linear-gradient(arguments);
+  bi -ms-linear-gradient(arguments);
+  bi linear-gradient(arguments);
+bc()
+  background-color arguments
+rad()
+  vendor 'border-radius' arguments
+pad()
+  padding arguments
+padb()
+  padding-bottom arguments
+mar()
+  margin arguments
+marb()
+  margin-bottom arguments
+bor()
+  border arguments
+bort()
+  border-top arguments
+borb()
+  border-bottom arguments
+deco()
+  text-decoration arguments
+fw()
+	font-weight arguments
+/* Begin App Styles */
+html, body
+  mar 0
+  pad 0
+  min-height 100%
+body
+  font normal 14px/18px Helvetica, Arial, Sans-Serif
+#main
+  mar 0 auto
+  pad 20px 20px 40px 20px
+  mart 20px
+  bor solid 1px #ddd
+  bort none
+h1
+  padb 10px
+  borb double 10px #666
+  mart 30px
+  &.returnHome a
+    deco none
+    color #000
+  &.noBottomBorder
+    bort none
+  &.showCursor
+    cursor pointer
+h2:after
+  content ":"
+a
+  &.logout
+    float right
+    mar -10px 0 0 20px
+  &.button
+    grad top, #fff, #ccc
+    bor solid 1px #666
+    rad 5px
+    pad 4px 23px
+    deco none
+    color #000
+    shad 1px 1px 3px #666
+    fs 14px
+    &:hover
+      bi none;
+      shad inset 0 0 8px #aaa, 1px 1px 3px #666
+    &:active
+      grad top, #ccc, #fff
+      shad none
+input[type=text], input[type=password]
+  width 250px
+  margin-bottom 20px
+
+#productName
+  width: 400px
+.error
+  color red;
+  bc #fff9d6
+  bor solid 1px red
+  fw bold
+  pad 20px
+span.error
+  mar 10px 0 20px
+  display inline-block
+.name
+  fw bold
+.label
+  mar 0
+.label + p 
+  margin-top 0
+.selectLabel
+  margin-top 0
+#notification
+  position absolute
+  top 20px
+  right 30px
+  -webkit-transform translate3d(300%,0,0)
+  -moz-transform translate3d(300%,0,0)
+  -o-transform translate3d(300%,0,0)
+  -ms-transform translate3d(300%,0,0)
+  padding 10px 40px
+  border solid 1px #666
+  border-radius 10px
+  background-color #ccc
+.animateNotification 
+  -webkit-animation-duration 5s
+  -webkit-animation-timing-function ease-in-out
+  -webkit-animation-fill-mode forwards
+  -webkit-animation-name showNotification
+  -moz-animation-duration 5s
+  -moz-animation-timing-function ease-in-out
+  -moz-animation-fill-mode forwards
+  -moz-animation-name showNotification
+  -o-animation-duration 5s
+  -o-animation-timing-function ease-in-out
+  -o-animation-fill-mode forwards
+  -o-animation-name showNotification
+  -ms-animation-duration 5s
+  -ms-animation-timing-function ease-in-out
+  -ms-animation-fill-mode forwards
+  -ms-animation-name showNotification
+@-webkit-keyframes showNotification {
+	0% { -webkit-transform: translate3d(300%,0,0); opacity: 1 }
+	25% { -webkit-transform: translate3d(0,0,0); opacity: 1 }
+	95% { -webkit-transform: translate3d(0,0,0); opacity: 1 }
+	100% { -webkit-transform: translate3d(0,0,0); opacity: 0 }
+}
+@-moz-keyframes showNotification {
+	0% { -webkit-transform: translate3d(300%,0,0); opacity: 1 }
+	25% { -webkit-transform: translate3d(0,0,0); opacity: 1 }
+	95% { -webkit-transform: translate3d(0,0,0); opacity: 1 }
+	100% { -webkit-transform: translate3d(0,0,0); opacity: 0 }
+}
+@-o-keyframes showNotification {
+	0% { -webkit-transform: translate3d(300%,0,0); opacity: 1 }
+	25% { -webkit-transform: translate3d(0,0,0); opacity: 1 }
+	95% { -webkit-transform: translate3d(0,0,0); opacity: 1 }
+	100% { -webkit-transform: translate3d(0,0,0); opacity: 0 }
+}
+@-ms-keyframes showNotification {
+	0% { -webkit-transform: translate3d(300%,0,0); opacity: 1 }
+	25% { -webkit-transform: translate3d(0,0,0); opacity: 1 }
+	95% { -webkit-transform: translate3d(0,0,0); opacity: 1 }
+	100% { -webkit-transform: translate3d(0,0,0); opacity: 0 }
+}

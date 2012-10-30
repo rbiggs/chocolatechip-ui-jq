@@ -809,7 +809,7 @@ $.fn.UISegmentedControl = function( container, callback ) {
 		} else {
 			container.attr("ui-selected-index", 0);
 		}
-		container.children().css("display: none;");
+		container.children().css("display", "none");
 		container.children().eq(val).css("display","block");
 		that.attr("ui-segmented-container", ("#" + container.attr("id")));
 		var selectedIndex = this.attr("ui-selected-index");
