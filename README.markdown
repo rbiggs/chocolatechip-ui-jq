@@ -1,6 +1,3 @@
----
-title: ChocolateChip-UI - A Compact JavaScript Framework for Mobile Webkit Apps
----
 #ChocolateChip-UI for jQuery
 
 ##Notice: All work on this repository has been terminated!
