@@ -128,7 +128,7 @@ $.extend({
 			$.UINavigationHistory.push(item.attr("href"));
 			} catch(err) {}
 		};
-        $.app.delegate("tablecell", "click", function() {
+        $.app.delegate("tablecell,tabbar uibutton", "click", function() {
             if ($(this).attr("href")) {
 	            if ($.UINavigationEvent) {
 	                return;
@@ -929,6 +929,7 @@ $.fn.UICreateTabBar = function ( opts ) {
 	var iconsOfTabs = opts.iconsOfTabs;
 	var selectedTab = opts.selectedTab || 0;
 	var disabledTab = opts.disabledTab || null;
+	var hrefLink = opts.hrefLink || null;
 	var tabbar = "<tabbar ui-selected-tab='" + selectedTab + "'>";
 	$(this).attr("ui-tabbar-id", id);
 	for (var i = 0; i < numberOfTabs; i++) {
@@ -942,6 +943,9 @@ $.fn.UICreateTabBar = function ( opts ) {
 				tabbar += "disabled";
 			}
 			tabbar += "'";
+		}
+		if(hrefLink != null){
+			tabbar += " href = '" + hrefLink[i] + "' ";
 		}
 		tabbar += "><icon style='-webkit-mask-box-image: url(" + imagePath;
 		tabbar += iconsOfTabs[i] + ".svg);'></icon>";
